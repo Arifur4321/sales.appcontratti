@@ -1,3 +1,4 @@
+
 <header id="page-topbar">
     <div class="navbar-header">
         <div class="d-flex">
@@ -27,18 +28,18 @@
             </button>
 
            <!-- App Search-->
-           <form class="app-search d-none d-lg-block">
+           <!-- <form class="app-search d-none d-lg-block">
             <div class="position-relative">
                 <input type="text" class="form-control" placeholder="@lang('translation.Search')">
                 <span class="bx bx-search-alt"></span>
             </div>
-        </form>
+        </form> -->
 
         <div class="dropdown dropdown-mega d-none d-lg-block ms-2">
-            <button type="button" class="btn header-item waves-effect" data-bs-toggle="dropdown" aria-haspopup="false" aria-expanded="false">
+            <!-- <button type="button" class="btn header-item waves-effect" data-bs-toggle="dropdown" aria-haspopup="false" aria-expanded="false">
                 <span key="t-megamenu">@lang('translation.Mega_Menu')</span>
                 <i class="mdi mdi-chevron-down"></i>
-            </button>
+            </button> -->
             <div class="dropdown-menu dropdown-megamenu">
                 <div class="row">
                     <div class="col-sm-8">
@@ -169,10 +170,10 @@
     <div class="d-flex">
 
         <div class="dropdown d-inline-block d-lg-none ms-2">
-            <button type="button" class="btn header-item noti-icon waves-effect" id="page-header-search-dropdown"
+            <!-- <button type="button" class="btn header-item noti-icon waves-effect" id="page-header-search-dropdown"
                 data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="mdi mdi-magnify"></i>
-            </button>
+            </button> -->
             <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end p-0"
                 aria-labelledby="page-header-search-dropdown">
 
@@ -189,7 +190,7 @@
         </div>
 
         <div class="dropdown d-inline-block">
-            <button type="button" class="btn header-item waves-effect"
+            <!-- <button type="button" class="btn header-item waves-effect"
                 data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 @switch(Session::get('lang'))
                     @case('ru')
@@ -207,7 +208,7 @@
                     @default
                         <img src="{{ URL::asset('build/images/flags/us.jpg')}}" alt="Header Language" height="16">
                 @endswitch
-            </button>
+            </button> -->
             <div class="dropdown-menu dropdown-menu-end">
 
                 <!-- item-->
@@ -237,10 +238,10 @@
         </div>
 
         <div class="dropdown d-none d-lg-inline-block ms-1">
-            <button type="button" class="btn header-item noti-icon waves-effect"
+            <!-- <button type="button" class="btn header-item noti-icon waves-effect"
                 data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="bx bx-customize"></i>
-            </button>
+            </button> -->
             <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
                 <div class="px-lg-2">
                     <div class="row g-0">
@@ -288,16 +289,16 @@
             </div>
         </div>
         <div class="dropdown d-none d-lg-inline-block ms-1">
-            <button type="button" class="btn header-item noti-icon waves-effect" data-toggle="fullscreen">
+            <!-- <button type="button" class="btn header-item noti-icon waves-effect" data-toggle="fullscreen">
                 <i class="bx bx-fullscreen"></i>
-            </button>
+            </button> -->
         </div>
         <div class="dropdown d-inline-block">
-            <button type="button" class="btn header-item noti-icon waves-effect" id="page-header-notifications-dropdown"
+            <!-- <button type="button" class="btn header-item noti-icon waves-effect" id="page-header-notifications-dropdown"
                 data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="bx bx-bell bx-tada"></i>
                 <span class="badge bg-danger rounded-pill">3</span>
-            </button>
+            </button> -->
             <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end p-0"
                 aria-labelledby="page-header-notifications-dropdown">
                 <div class="p-3">
@@ -382,16 +383,21 @@
         <div class="dropdown d-inline-block">
             <button type="button" class="btn header-item waves-effect" id="page-header-user-dropdown"
                 data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <img class="rounded-circle header-profile-user" src="{{ isset(Auth::user()->avatar) ? asset(Auth::user()->avatar) : asset('build/images/users/avatar-1.jpg') }}"
+                <img class="rounded-circle header-profile-user" src="{{  asset('build/images/users/user-dummy-img.jpg') }}"
                     alt="Header Avatar">
                 <span class="d-none d-xl-inline-block ms-1" key="t-henry">{{ucfirst(Auth::user()->name)}}</span>
                 <i class="mdi mdi-chevron-down d-none d-xl-inline-block"></i>
             </button>
             <div class="dropdown-menu dropdown-menu-end">
                 <!-- item-->
-                <a class="dropdown-item" href="contacts-profile"><i class="bx bx-user font-size-16 align-middle me-1"></i> <span key="t-profile">@lang('translation.Profile')</span></a>
-                <a class="dropdown-item" href="#"><i class="bx bx-wallet font-size-16 align-middle me-1"></i> <span key="t-my-wallet">@lang('translation.My_Wallet')</span></a>
-                <a class="dropdown-item d-block" href="#" data-bs-toggle="modal" data-bs-target=".change-password"><span class="badge bg-success float-end">11</span><i class="bx bx-wrench font-size-16 align-middle me-1"></i> <span key="t-settings">@lang('translation.Settings')</span></a>
+                <!-- <a class="dropdown-item" href="contacts-profile"><i class="bx bx-user font-size-16 align-middle me-1"></i> <span key="t-profile">@lang('translation.Profile')</span></a>
+               
+                <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target=".update-profile">
+                    <i class="bx bx-user font-size-16 align-middle me-1"></i> Edit Profile
+                </a>
+                -->
+                <!-- <a class="dropdown-item" href="#"><i class="bx bx-wallet font-size-16 align-middle me-1"></i> <span key="t-my-wallet">@lang('translation.My_Wallet')</span></a> -->
+                <a class="dropdown-item d-block" href="#" data-bs-toggle="modal" data-bs-target=".change-password"><span class="badge bg-success float-end"></span><i class="bx bx-wrench font-size-16 align-middle me-1"></i> <span key="t-settings"> Update Password</span></a>
                 <a class="dropdown-item" href="#"><i class="bx bx-lock-open font-size-16 align-middle me-1"></i> <span key="t-lock-screen">@lang('translation.Lock_screen')</span></a>
                 <div class="dropdown-divider"></div>
                 <a class="dropdown-item text-danger" href="javascript:void();" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><i class="bx bx-power-off font-size-16 align-middle me-1 text-danger"></i> <span key="t-logout">@lang('translation.Logout')</span></a>
@@ -401,9 +407,9 @@
             </div>
         </div>
         <div class="dropdown d-inline-block">
-            <button type="button" class="btn header-item noti-icon right-bar-toggle waves-effect">
+            <!-- <button type="button" class="btn header-item noti-icon right-bar-toggle waves-effect">
                 <i class="bx bx-cog bx-spin"></i>
-            </button>
+            </button> -->
         </div>
     </div>
 </div>
@@ -455,3 +461,109 @@ aria-labelledby="myLargeModalLabel" aria-hidden="true">
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
+
+
+
+<!--  Update Profile example -->
+<div class="modal fade update-profile" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="myLargeModalLabel">Edit Profile</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal" method="POST" enctype="multipart/form-data" id="update-profile">
+                    @csrf
+                    <input type="hidden" value="{{ Auth::user()->id }}" id="data_id">
+                    <div class="mb-3">
+                        <label for="useremail" class="form-label">Email</label>
+                        <input type="email" class="form-control @error('email') is-invalid @enderror" id="useremail" value="{{ Auth::user()->email }}" name="email" placeholder="Enter email" autofocus>
+                        <div class="text-danger" id="emailError" data-ajax-feedback="email"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control @error('name') is-invalid @enderror" value="{{ Auth::user()->name }}" id="username" name="name" autofocus placeholder="Enter username">
+                        <div class="text-danger" id="nameError" data-ajax-feedback="name"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="userdob">Date of Birth</label>
+                        <div class="input-group" id="datepicker1">
+                            <input type="text" class="form-control @error('dob') is-invalid @enderror" placeholder="dd-mm-yyyy" data-date-format="dd-mm-yyyy" data-date-container='#datepicker1' data-date-end-date="0d" value="{{ date('d-m-Y', strtotime(Auth::user()->dob)) }}" data-provide="datepicker" name="dob" autofocus id="dob">
+                            <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+                        </div>
+                        <div class="text-danger" id="dobError" data-ajax-feedback="dob"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="avatar">Profile Picture</label>
+                        <div class="input-group">
+                            <input type="file" class="form-control @error('avatar') is-invalid @enderror" id="avatar" name="avatar" autofocus>
+                            <label class="input-group-text" for="avatar">Upload</label>
+                        </div>
+                        <div class="text-start mt-2">
+                            <img src="{{ asset(Auth::user()->avatar) }}" alt="" class="rounded-circle avatar-lg">
+                        </div>
+                        <div class="text-danger" role="alert" id="avatarError" data-ajax-feedback="avatar"></div>
+                    </div>
+
+                    <div class="mt-3 d-grid">
+                        <button class="btn btn-primary waves-effect waves-light UpdateProfile" data-id="{{ Auth::user()->id }}" type="submit">Update</button>
+                    </div>
+                </form>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+
+ 
+@section('script')
+<!-- apexcharts -->
+<script src="{{ URL::asset('build/libs/apexcharts/apexcharts.min.js') }}"></script>
+
+<!-- profile init -->
+<script src="{{ URL::asset('build/js/pages/profile.init.js') }}"></script>
+
+<script>
+    $('#update-profile').on('submit', function(event) {
+        event.preventDefault();
+        var Id = $('#data_id').val();
+        let formData = new FormData(this);
+        $('#emailError').text('');
+        $('#nameError').text('');
+        $('#dobError').text('');
+        $('#avatarError').text('');
+        $.ajax({
+            url: "{{ url('update-profile') }}" + "/" + Id,
+            type: "POST",
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function(response) {
+                $('#emailError').text('');
+                $('#nameError').text('');
+                $('#dobError').text('');
+                $('#avatarError').text('');
+                if (response.isSuccess == false) {
+                    alert(response.Message);
+                } else if (response.isSuccess == true) {
+                    setTimeout(function() {
+                        window.location.reload();
+                    }, 1000);
+                }
+            },
+            error: function(response) {
+                $('#emailError').text(response.responseJSON.errors.email);
+                $('#nameError').text(response.responseJSON.errors.name);
+                $('#dobError').text(response.responseJSON.errors.dob);
+                $('#avatarError').text(response.responseJSON.errors.avatar);
+            }
+        });
+    });
+</script>
+
+@endsection

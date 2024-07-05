@@ -94,7 +94,7 @@
 
                                     <div>
                                         <h5 class="text-primary"> Reset Password</h5>
-                                        <p class="text-muted">Re-Password with Skote.</p>
+                                        <p class="text-muted">Re-Password with  Codice 1%</p>
                                     </div>
 
                                     <div class="mt-4">

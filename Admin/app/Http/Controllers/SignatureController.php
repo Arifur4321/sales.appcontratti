@@ -27,14 +27,12 @@ use Dropbox\Sign\Model\SignatureRequestGetResponse;
 use Dropbox\Sign\Model\SubSignatureRequestSigner;
 use Dropbox\Sign\Model\SubSigningOptions;
  
- 
- 
-use Illuminate\Support\Facades\Storage;
+
 
 class SignatureController extends Controller
 {
-
-
+    
+      
 
     public function checkSignatureStatus()
     {
@@ -93,134 +91,6 @@ class SignatureController extends Controller
 
         return response()->json(['statuses' => $statuses]);
     }
-
-
-
-    
-    // public function checkSignatureStatus()
-    // {
-    //     $config = Configuration::getDefaultConfiguration();
-    //     $config->setUsername(env('HELLOSIGN_API_KEY'));
-
-    //     $signatureRequestApi = new SignatureRequestApi($config);
-
-    //     $salesListDrafts = SalesListDraft::all();
-
-    //     $statuses = [];
-
-    //     foreach ($salesListDrafts as $salesListDraft) {
-    //         $envelopeId = $salesListDraft->envelope_id;
-
-    //         if (empty($envelopeId)) {
-    //             $statuses[$salesListDraft->id] = 'no envelope id';
-    //             continue;
-    //         }
-
-    //         try {
-    //             $result = $signatureRequestApi->signatureRequestGet($envelopeId);
-    //             $signatureRequest = $result->getSignatureRequest();
-
-    //             $allStatuses = [];
-    //             foreach ($signatureRequest->getSignatures() as $signature) {
-    //                 $allStatuses[] = $signature->getStatusCode();
-    //             }
-
-    //             $overallStatus = 'pending';
-    //             if (in_array('declined', $allStatuses)) {
-    //                 $overallStatus = 'declined';
-    //             } elseif (in_array('signed', $allStatuses)) {
-    //                 $overallStatus = 'signed';
-    //             } elseif (in_array('viewed', $allStatuses)) {
-    //                 $overallStatus = 'viewed';
-    //             } elseif (in_array('sent', $allStatuses)) {
-    //                 $overallStatus = 'pending';
-    //             }
-
-    //             $salesListDraft->status = $overallStatus;
-
-    //             if ($overallStatus == 'signed') {
-    //                 // Fetch the signed PDF from HelloSign and save it
-    //                 $signedFile = $signatureRequestApi->signatureRequestFiles($envelopeId, 'pdf');
-
-    //                 // Save the file to the public directory
-    //                 $filePath = 'signed_pdfs/' . $salesListDraft->selected_pdf_name . '.pdf';
-    //                 Storage::disk('public')->put($filePath, $signedFile);
-
-    //                 // Set the file URL for the response
-    //                 $salesListDraft->signed_pdf_url = Storage::url($filePath);
-    //             }
-
-    //             $salesListDraft->save();
-    //             $statuses[$envelopeId] = $overallStatus;
-    //         } catch (\Exception $e) {
-    //             $statuses[$envelopeId] = 'error';
-    //             \Log::error("Error checking status for envelope ID $envelopeId: " . $e->getMessage());
-    //         }
-    //     }
-
-    //     return response()->json(['statuses' => $statuses]);
-    // }
-
-
-
-
-    // public function checkSignatureStatus()
-    // {
-    //     $config = \Dropbox\Sign\Configuration::getDefaultConfiguration();
-    //     $config->setUsername(env('HELLOSIGN_API_KEY'));
-
-    //     $signatureRequestApi = new \Dropbox\Sign\Api\SignatureRequestApi($config);
-
-    //     $salesListDrafts = SalesListDraft::all();
-
-    //     $statuses = [];
-
-    //     foreach ($salesListDrafts as $salesListDraft) {
-    //         $envelopeId = $salesListDraft->envelope_id;
-
-    //         // Check if envelopeId is not null or empty
-    //         if (empty($envelopeId)) {
-    //             $statuses[$salesListDraft->id] = 'no envelope id';
-    //             continue;
-    //         }
-
-    //         try {
-    //             $result = $signatureRequestApi->signatureRequestGet($envelopeId);
-    //             $signatureRequest = $result->getSignatureRequest();
-
-    //             $allStatuses = [];
-    //             foreach ($signatureRequest->getSignatures() as $signature) {
-    //                 $allStatuses[] = $signature->getStatusCode();
-    //             }
-
-    //             // Determine the overall status
-    //             $overallStatus = 'pending';
-    //             if (in_array('declined', $allStatuses)) {
-    //                 $overallStatus = 'declined';
-    //             } elseif (in_array('signed', $allStatuses)) {
-    //                 $overallStatus = 'signed';
-    //             } elseif (in_array('viewed', $allStatuses)) {
-    //                 $overallStatus = 'viewed';
-    //             } elseif (in_array('sent', $allStatuses)) {
-    //                 $overallStatus = 'pending';
-    //             }
-
-    //             // Update the status in the database
-    //             $salesListDraft->status = $overallStatus;
-    //             $salesListDraft->save();
-
-    //             // Add to statuses array for response
-    //             $statuses[$envelopeId] = $overallStatus;
-
-    //         } catch (\Exception $e) {
-    //             // Handle individual errors without stopping the entire process
-    //             $statuses[$envelopeId] = 'error';
-    //             \Log::error("Error checking status for envelope ID $envelopeId: " . $e->getMessage());
-    //         }
-    //     }
-
-    //     return response()->json(['statuses' => $statuses]);
-    // }
 
         
 

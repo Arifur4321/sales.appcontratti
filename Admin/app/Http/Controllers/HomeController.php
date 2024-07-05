@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Session;
 use App\Models\SalesDetails; // sales details tables 
+use App\Models\SalesListDraft;
 
 class HomeController extends Controller
 {
@@ -37,8 +38,37 @@ class HomeController extends Controller
 
     public function root()
     {
-        return view('index');
+        return view('/');
     }
+
+    public function contractList()
+    {
+    
+    // Fetch contracts from the database if needed
+    //   $salesListDraft = SalesListDraft::all();
+    //   return view('Your-Lists', compact('salesListDraft'));
+
+     $sellerName = Auth::user()->name;
+
+     $salesDetail = SalesDetails::where('name', $sellerName)->first();
+     if (!$salesDetail) {
+         return response()->json(['status' => 'error', 'message' => 'Sales details not found']);
+     }
+
+     $salesId = $salesDetail->id;
+     $salesName = $salesDetail->name;
+
+     if ($sellerName == $salesName) {
+         // Query SalesListDraft table based on $salesId
+         $salesListDraft = SalesListDraft::where('sales_id', $salesId)->get();
+
+         return view('Your-Lists', compact('salesListDraft'));
+     }
+
+     return response()->json(['status' => 'error', 'message' => 'Unauthorized access']);
+   
+    }
+
 
     /*Language Translation*/
     public function lang($locale)

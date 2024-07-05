@@ -100,7 +100,7 @@
 
                                         <div>
                                             <h5 class="text-primary"> Reset Password</h5>
-                                            <p class="text-muted">Re-Password with Skote.</p>
+                                            <p class="text-muted">Re-Password with Codice 1%</p>
                                         </div>
 
                                         <div class="mt-4">
@@ -132,8 +132,8 @@
                                         <p class="mb-0">© <script>
                                                 document.write(new Date().getFullYear())
 
-                                            </script> Skote. Crafted with <i class="mdi mdi-heart text-danger"></i> by
-                                            Themesbrand</p>
+                                                </script>  Crafted with <i class="mdi mdi-heart text-danger"></i> by
+                                             Codice 1%</p>
                                     </div>
                                 </div>
 

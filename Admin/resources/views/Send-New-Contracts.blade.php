@@ -87,8 +87,8 @@
             <table id="sales-variable" class="table" >
                 <thead>
                     <tr>
-                        <th>Variable Name</th>
-                        <th>Variable Label Value</th>
+                      <th style="width:50%">Variable Name</th>
+                        <th style="width:60%">Variable Label Value</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -213,6 +213,10 @@
     left: 50%;
     transform: translateX(-50%);
 }
+
+.invalid-field {
+        border: 2px solid red;
+    }
 </style>
 
 
@@ -242,38 +246,6 @@
 </script>
 
 
-
-<!-- s <div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="myModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="myModalLabel">Preview PDF</h5>
-            </div>
-            <div class="col-8"><br>
-                <h6>Receiver/Customer Info</h6><br>
-                <form id="recipientForm" onsubmit="return false;">
-                    <div class="input-group mb-3">
-                        <span class="input-group-text" id="email-addon">Email</span>
-                        <input type="email" class="form-control" id="recipientEmail" placeholder="Enter email" aria-label="Email" aria-describedby="email-addon" required>
-                    </div>
-                    <div class="input-group mb-3">
-                        <span class="input-group-text" id="mobile-addon">Mobile Number</span>
-                        <input type="text" class="form-control" placeholder="Enter mobile number" aria-label="Mobile Number" aria-describedby="mobile-addon">
-                    </div>
-                </form>
-            </div>
-            <div class="modal-body" style="height: 60vh; overflow-y: auto;">
-                
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" id="closeModalBtn" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" id="sendButton"  data-bs-dismiss="modal" disabled>Send</button>
-            </div>
-        </div>
-    </div>
-</div> -->
-
- <!--    -->
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/14.7.0/nouislider.min.css">
@@ -335,40 +307,7 @@
 
  
 
-    // function sendDocumentForSignature(pdfUrl, recipientEmail, recipientName) {
-    //     var csrfToken = $('meta[name="csrf-token"]').attr('content');
-
-    //     $.ajax({
-    //         url: '/send-document-for-signature',
-    //         type: 'POST',
-    //         data: {
-    //             pdfUrl: pdfUrl,
-    //             recipientEmail: recipientEmail,
-    //             recipientName: recipientName
-    //         },
-    //         headers: {
-    //             'X-CSRF-TOKEN': csrfToken
-    //         },
-    //         success: function(response) {
-    //             console.log('Document sent for signature, envelope ID:', response.envelope_id);
-    //             Swal.fire({
-    //                 title: 'Success!',
-    //                 text: 'Document sent successfully!',
-    //                 icon: 'success',
-    //                 confirmButtonText: 'OK'
-    //             });
-    //         },
-    //         error: function(xhr, status, error) {
-    //             console.error('Error sending document for signature:', error);
-    //             Swal.fire({
-    //                 title: 'Error!',
-    //                 text: 'Error sending document: ' + error,
-    //                 icon: 'error',
-    //                 confirmButtonText: 'OK'
-    //             });
-    //         }
-    //     });
-    // }
+   
 
     let signatureCheckInterval;
 
@@ -390,7 +329,8 @@
     function sendDocumentForSignature(pdfUrl, recipientEmail, recipientName, recipientMobile) {
         var csrfToken = $('meta[name="csrf-token"]').attr('content');
         var id = window.location.pathname.split('/').pop(); // Extract ID from the URL
-
+        var selectedContract = $('#Contract').val();
+        
         console.log('Sending document for signature');
 
         $.ajax({
@@ -402,7 +342,8 @@
                 recipientEmail: recipientEmail,
                 recipientName: recipientName,
                 recipientMobile: recipientMobile,
-                id: id
+                id: id,
+                selectedContractId : selectedContract
             },
             headers: {
                 'X-CSRF-TOKEN': csrfToken
@@ -432,59 +373,6 @@
         });
     }
 
-
-
-//        // AJAX call when "Send" button is clicked
-//        $('#sendButton').on('click', function() {
-//         var pdfUrl = $('.modal-body embed').attr('src');
-//         var recipientEmail = $('#recipientEmail').val();
-//         var recipientName = "Recipient"; // You can add an input field for recipientName if needed
-
-//         sendDocumentForSignature(pdfUrl, recipientEmail, recipientName);
-//     });
-
- 
-
-// function sendDocumentForSignature(pdfUrl, recipientEmail, recipientName) {
-//     var csrfToken = $('meta[name="csrf-token"]').attr('content');
-//     var id = window.location.pathname.split('/').pop(); // Extract ID from the URL
-
-//     $.ajax({
-//         url: '/send-document-for-signature',
-//         type: 'POST',
-//         data: {
-//             pdfUrl: pdfUrl,
-//             recipientEmail: recipientEmail,
-//             recipientName: recipientName,
-//             id: id
-//         },
-//         headers: {
-//             'X-CSRF-TOKEN': csrfToken
-//         },
-//         success: function(response) {
-//             console.log('Document sent for signature, envelope ID:', response.envelope_id);
-        
-//             Swal.fire({
-//                 title: 'Success!',
-//                 text: 'Document sent successfully!',
-//                 icon: 'success',
-//                 confirmButtonText: 'OK'
-//             });
-
-//             // Start checking the signature status periodically
-//             startPeriodicStatusCheck(response.envelope_id);
-//         },
-//         error: function(xhr, status, error) {
-//             console.error('Error sending document for signature:', error);
-//             Swal.fire({
-//                 title: 'Error!',
-//                 text: 'Error sending document: ' + error,
-//                 icon: 'error',
-//                 confirmButtonText: 'OK'
-//             });
-//         }
-//     });
-// }
 
 function startPeriodicStatusCheck(envelopeId) {
     if (signatureCheckInterval) {
@@ -558,38 +446,13 @@ function checkSignatureStatus() {
     var changedValue;
  
 
+    var dueDateValues = []; // Initialize array to price table due dates
+    var amountValues = [];  // Initialize array to price  table amounts
 
     var priceJsonData = {};  
-        
-// Function to collect price values for PDF generation
-function collectPriceValues() {
-        var priceValues = {
-            dynamicminRange: priceJsonData.dynamicminRange || null,
-            fixedvalue: priceJsonData.fixedvalue || null,
-            paymentMinRange: priceJsonData.paymentMinRange,
-            paymentMaxRange: priceJsonData.paymentMaxRange,
-            currency: priceJsonData.currency,
-            frequency: priceJsonData.frequency,
-            payments: []
-        };
 
-        $('#sales-variable tbody tr').each(function(index, row) {
-            var cells = $(row).find('td');
-            if (cells.length > 1) {
-                var payment = {
-                    description: cells.eq(0).text(),
-                    amount: parseFloat(cells.eq(1).find('input').val()),
-                    vatIncluded: cells.eq(2).text(),
-                    dueDate: cells.eq(4).find('input').val() || cells.eq(4).text()
-                };
-                priceValues.payments.push(payment);
-            }
-        });
 
-        console.log('Updated price value object:', priceValues);
-        return priceValues;
-    }
-
+ 
     // Function to collect variable values
     function collectVariableValues() {
     var variableValues = {};
@@ -635,16 +498,72 @@ function collectPriceValues() {
 }
 
 
+ 
+function validateTableFields() {
+        let allValid = true;
+        let errorMessage = '';
 
-    $('#mytestButton').on('click', function() {
-            //event.preventDefault();
-            // Call the getTheContract() function when the button is clicked
-            var selectedContract = $('#Contract').val();
-            
-            getTheContractmytest(selectedContract);
-              // Wait for 5 seconds (5000 milliseconds)
-             
+        // Loop through each row in the #sales-variable table
+        $('#sales-variable tbody tr').each(function() {
+            let row = $(this);
+
+            // Remove previous invalid marks
+            row.find('.invalid-field').removeClass('invalid-field');
+
+            // Check if text or date inputs are filled
+            row.find('input[type="text"], input[type="date"]').each(function() {
+                if ($(this).val().trim() === '') {
+                    allValid = false;
+                    $(this).addClass('invalid-field'); // Add invalid mark
+                    errorMessage = 'Please fill out Mandatory text and date fields.';
+                }
+            });
+
+            // Check if at least one radio button is selected in each group
+            let radioGroups = new Set();
+            row.find('input[type="radio"]').each(function() {
+                radioGroups.add($(this).attr('name'));
+            });
+
+            radioGroups.forEach(function(group) {
+                if ($('input[name="' + group + '"]:checked').length === 0) {
+                    allValid = false;
+                    // Mark all radio buttons in the group as invalid
+                    $('input[name="' + group + '"]').addClass('invalid-field');
+                    errorMessage = 'Please select at least one option in each radio button group.';
+                }
+            });
+
+            // Check if at least one checkbox is selected in each row
+            if (row.find('input[type="checkbox"]').length > 0 && row.find('input[type="checkbox"]:checked').length === 0) {
+                allValid = false;
+                // Mark all checkboxes in the row as invalid
+                row.find('input[type="checkbox"]').addClass('invalid-field');
+                errorMessage = 'Please select at least one checkbox in each group.';
+            }
         });
+
+        if (!allValid) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Error',
+                text: errorMessage
+            });
+        }
+
+        return allValid;
+    }
+
+
+
+
+$('#mytestButton').on('click', function() {
+                if (validateTableFields()) {
+                    var selectedContract = $('#Contract').val();
+                    getTheContractmytest(selectedContract);
+                }
+            });
+
 
     // Function to get the contract and generate PDF
     function getTheContractmytest(selectedContract) {
@@ -652,7 +571,7 @@ function collectPriceValues() {
             var csrfToken = $('meta[name="csrf-token"]').attr('content');
             var variableValues = collectVariableValues();
             var priceValues = collectPriceValues();
-
+            $('#spinner-overlay').show();
             $.ajax({
                 url: '/get-pdf-sales',
                 type: 'POST',
@@ -689,9 +608,28 @@ function collectPriceValues() {
                             }
                         });
                     });
+
+                    $('#spinner-overlay').hide();
                 },
                 error: function(xhr, status, error) {
                     console.error(error);
+
+                    var response = xhr.responseJSON;
+                    
+                    // Display the detailed error using SweetAlert2
+                    Swal.fire({
+                        icon: 'error', // Type of the alert
+                        title: 'Error',
+                        html: `
+                            <p>${response.error}</p>
+                            <p><strong>Total Check:</strong> ${response.totalCheck}</p>
+                            <p><strong>Expected Total:</strong> ${response.expectedTotal}</p>
+                        `,
+                        footer: 'Please try again later or contact support if the issue persists.'
+                    });
+
+
+                    $('#spinner-overlay').hide();
                 }
             });
         }
@@ -771,7 +709,14 @@ $.each(response.variableData, function(index, variable) {
         });
     }
 
-    tableRow.append('<td>' + variable.VariableName + '</td>');
+    function stripHtml(html) {
+        var temporaryDiv = document.createElement("div");
+        temporaryDiv.innerHTML = html;
+        return temporaryDiv.textContent || temporaryDiv.innerText || "";
+    }
+
+
+    tableRow.append('<td>' + variable.VariableName  + '</td>');
 
     var labelValueCell = $('<td></td>');
     switch (variable.VariableType) {
@@ -780,8 +725,10 @@ $.each(response.variableData, function(index, variable) {
             var defaultDate = new Date().toISOString().slice(0, 10);
             inputField = $('<input type="date" class="form-control flex-grow-1 mr-2" value="' + defaultDate + '">');
             icon = createIcon();
+            var mandatorySign = $('<span class="text-danger mr-1">*</span>'); // Add the asterisk
+        
 
-            container.append(inputField, icon);
+            container.append(inputField, mandatorySign,icon);
             labelValueCell.append(container);
 
             inputField.on('change', function() {
@@ -794,7 +741,10 @@ $.each(response.variableData, function(index, variable) {
             inputField = $('<input class="form-control flex-grow-1 mr-2 single-line-text"    type="text">').val('');
             icon = createIcon();
 
-            container.append(inputField, icon);
+            var mandatorySign = $('<span class="text-danger mr-1">*</span>'); // Add the asterisk
+        
+
+            container.append(inputField, mandatorySign, icon);
             labelValueCell.append(container);
 
             inputField.on('input', function() {
@@ -807,7 +757,10 @@ $.each(response.variableData, function(index, variable) {
             inputField = $('<input class="form-control flex-grow-1 mr-2 multiple-line-text"  type="text">').val('');
             icon = createIcon();
 
-            container.append(inputField, icon);
+            var mandatorySign = $('<span class="text-danger mr-1">*</span>'); // Add the asterisk
+           
+
+            container.append(inputField, mandatorySign,icon);
             labelValueCell.append(container);
 
             inputField.on('input', function() {
@@ -815,26 +768,34 @@ $.each(response.variableData, function(index, variable) {
             });
             break;
 
+     // Case for 'Single Box'
         case 'Single Box':
             container = $('<div class="d-flex flex-column align-items-start w-100 mb-2"></div>');
             icon = createIcon();
+            var mandatorySign = $('<span class="text-danger mr-1">*</span>'); // Add the asterisk
             var iconContainer = $('<div class="d-flex align-items-center ml-auto"></div>');
-
+        
             if (variable.VariableLabelValue && variable.VariableLabelValue.length > 0) {
                 var radioGroupName = 'radio_group_' + Math.random().toString(36).substring(7);
-
+        
                 $.each(variable.VariableLabelValue, function(index, value) {
-                    var radioContainer = $('<div class="form-check"></div>');
-                    var radioBtn = $('<input class="form-check-input" type="radio">').val(value).attr('name', radioGroupName);
-                    var radioLabel = $('<label class="form-check-label">' + value + '</label>');
+                    var inputValue = value.inputValue || ''; // Extract inputValue
 
-                    if (variable.Value && variable.Value.includes(value)) {
+                    var ckEditorContent = value.ckEditorContent || ''; // Extract ckEditorContent
+                    var readableContent = stripHtml(ckEditorContent); // Make ckEditorContent human-readable
+                    var combinedValue = inputValue + ' ' + readableContent; // Combine inputValue with readable content
+                    // Adding margin-bottom for spacing
+                    var radioContainer = $('<div class="form-check mb-2"></div>'); // mb-2 adds bottom margin
+                    var radioBtn = $('<input class="form-check-input" type="radio">').val(combinedValue).attr('name', radioGroupName);
+                    var radioLabel = $('<label class="form-check-label">' + inputValue + '</label>');
+        
+                    if (variable.Value && variable.Value.includes(inputValue)) {
                         radioBtn.prop('checked', true);
                     }
-
+        
                     radioContainer.append(radioBtn, radioLabel);
                     container.append(radioContainer);
-
+        
                     radioBtn.on('change', function() {
                         if ($(this).is(':checked')) {
                             updateVariableData(variable.id, $(this).val(), 'Single Box');
@@ -842,30 +803,38 @@ $.each(response.variableData, function(index, variable) {
                     });
                 });
             }
+
             labelValueCell.append(container);
-            iconContainer.append(icon);
+            iconContainer.append(mandatorySign,icon);
             container.append(iconContainer); 
             break;
-
+        
+        // Case for 'Multiple Box'
         case 'Multiple Box':
             container = $('<div class="d-flex flex-column align-items-start w-100 mb-2"></div>');
             icon = createIcon();
+            var mandatorySign = $('<span class="text-danger mr-1">*</span>'); // Add the asterisk
             var iconContainer = $('<div class="d-flex align-items-center ml-auto"></div>');
-
+        
             if (variable.VariableLabelValue && variable.VariableLabelValue.length > 0) {
                 $.each(variable.VariableLabelValue, function(index, value) {
-                    var checkboxContainer = $('<div class="form-check"></div>');
-                    var checkbox = $('<input class="form-check-input" type="checkbox">').val(value);
-
-                    if (variable.Value && variable.Value.includes(value)) {
+                    var inputValue = value.inputValue || ''; // Extract inputValue
+                    var ckEditorContent = value.ckEditorContent || ''; // Extract ckEditorContent
+                    var readableContent = stripHtml(ckEditorContent); // Make ckEditorContent human-readable
+                    var combinedValue = inputValue + ' ' + readableContent; // Combine inputValue with readable content
+                    // Adding margin-bottom for spacing
+                    var checkboxContainer = $('<div class="form-check mb-2"></div>'); // mb-2 adds bottom margin
+                    var checkbox = $('<input class="form-check-input" type="checkbox">').val(combinedValue);
+        
+                    if (variable.Value && variable.Value.includes(inputValue)) {
                         checkbox.prop('checked', true);
                     }
-
-                    var checkboxLabel = $('<label class="form-check-label">' + value + '</label>');
-
+        
+                    var checkboxLabel = $('<label class="form-check-label">' + inputValue + '</label>');
+        
                     checkboxContainer.append(checkbox, checkboxLabel);
                     container.append(checkboxContainer);
-
+        
                     checkbox.on('change', function() {
                         var selectedValues = [];
                         container.find('input[type="checkbox"]:checked').each(function() {
@@ -876,9 +845,10 @@ $.each(response.variableData, function(index, variable) {
                 });
             }
             labelValueCell.append(container);
-            iconContainer.append(icon);
+            iconContainer.append(mandatorySign, icon);
             container.append(iconContainer); 
             break;
+
     }
 
     tableRow.append(labelValueCell);
@@ -905,332 +875,345 @@ var paymentMinRange;
     },
     success: function(response) {
         console.log('get-all-priceLists data:', response);
-        priceJsonData = response;
+            priceJsonData = response;
 
-        paymentMinRange = response.paymentMinRange;
-        paymentMaxRange = response.paymentMaxRange;
+            var fixedvalue = response.fixedvalue;
+            var currency = response.currency;
+            var frequency = response.frequency;
+            var EditableDates = response.EditableDates;
+            var dynamicMinRange = response.dynamicminRange;
 
-        console.log('paymentMinRange ************-------------nw', paymentMinRange);
-        console.log('paymentMaxRange ************-------------nw', paymentMaxRange);
+            var selectionValue = dynamicMinRange !== null ? 'dynamic' : 'fixed';
+             
+            var includeOnPrice = response.price === "true";
+            var vatPercentage = response.vatPercentage;
+            var enableVat = response.enableVat === "true";
 
-        if (response.dynamicminRange !== null) {
-            var newRow = $('<tr>');
+            includeOnPrice = Boolean(includeOnPrice);
+            enableVat = Boolean(enableVat);
 
-            var pricenameCell = $('<td>').html("Price Name: " + response.pricename  +"<br> Min Range: " + response.dynamicminRange + " ,Max range: " +response.dynamicmaxRange);
+            paymentMinRange = response.paymentMinRange;
+            paymentMaxRange = response.paymentMaxRange;
 
-            
-            var currencySymbol;
-            switch (response.currency) {
-                case 'EUR':
-                    currencySymbol = '€';
-                    break;
-                case 'USD':
-                    currencySymbol = '$';
-                    break;
-                case 'GBP':
-                    currencySymbol = '£';
-                    break;
-                case 'JPY':
-                    currencySymbol = '¥';
-                    break;
-                default:
-                    currencySymbol = '';
-            }
+            console.log('paymentMinRange:', paymentMinRange);
+            console.log('paymentMaxRange:', paymentMaxRange);
 
-            var dynamicminRangeInput = $('<input>').attr({
-                type: 'text',
-                class: 'form-control dynamicminRangeInput',
-                value: currencySymbol + ' ' + response.dynamicminRange
-            });
+            let currentMaxRange = paymentMaxRange !== undefined ? paymentMaxRange : response.paymentMaxRange;
+            let currentDynamicMinRange = response.dynamicminRange;
 
-            dynamicminRangeInput.on('change', function() {
-                var inputValue = parseFloat($(this).val().replace(currencySymbol, '').trim());
-
-                if (inputValue < response.dynamicminRange || inputValue > response.dynamicmaxRange) {
-                    alert('The value must be between ' + response.dynamicminRange + ' and ' + response.dynamicmaxRange);
-                    $(this).val(currencySymbol + ' ' + response.dynamicminRange);
-                } else {
-                    priceJsonData.dynamicminRange = inputValue;
+            if (response.dynamicminRange !== null) {
+                var withtaxon = response.dynamicminRange;
+                if (selectionValue === 'dynamic' && includeOnPrice && enableVat) {
+                    var minRangeSliderCAL = parseFloat(response.dynamicminRange) + (vatPercentage * parseFloat(response.dynamicminRange)) / 100;
+                    withtaxon = minRangeSliderCAL;
                 }
-            });
 
-            var dynamicminRangeCell = $('<td>').append(dynamicminRangeInput);
-            newRow.append(pricenameCell, dynamicminRangeCell);
-            $('#sales-variable tbody').append(newRow);
-        }
+                var newRow = $('<tr>');
 
-        if (response.fixedvalue !== null) {
-            var newRow = $('<tr>');
-            var pricenameCell = $('<td>').html("Price Name: " + response.pricename  +"<br> Min Range: " + response.dynamicminRange + " ,Max range: " +response.dynamicmaxRange);
+                var pricenameCell = $('<td>').html("Price Name: " + response.pricename + "<br> Min Range: " + response.dynamicminRange + " ,Max range: " + response.dynamicmaxRange);
 
-            
+                var currencySymbol = getCurrencySymbol(response.currency);
 
-            var currencySymbol;
-            switch (response.currency) {
-                case 'EUR':
-                    currencySymbol = '€';
-                    break;
-                case 'USD':
-                    currencySymbol = '$';
-                    break;
-                case 'GBP':
-                    currencySymbol = '£';
-                    break;
-                case 'JPY':
-                    currencySymbol = '¥';
-                    break;
-                default:
-                    currencySymbol = '';
+                var dynamicminRangeInput = $('<input>').attr({
+                    type: 'text',
+                    class: 'form-control dynamicminRangeInput',
+                    value: currencySymbol + ' ' + withtaxon.toFixed(2)
+                });
+
+                dynamicminRangeInput.on('change', function() {
+                    var inputValue = parseFloat($(this).val().replace(currencySymbol, '').trim());
+
+                    if (inputValue < response.dynamicminRange || inputValue > response.dynamicmaxRange) {
+                        alert('The value must be between ' + response.dynamicminRange + ' and ' + response.dynamicmaxRange);
+                        $(this).val(currencySymbol + ' ' + withtaxon.toFixed(2));
+                    } else {
+                        currentDynamicMinRange = inputValue;
+                        priceJsonData.dynamicminRange = inputValue;
+                        updateTable(currentMaxRange, currentDynamicMinRange, response, priceJsonData);
+                    }
+                });
+
+                var dynamicminRangeCell = $('<td>').append(dynamicminRangeInput);
+                newRow.append(pricenameCell, dynamicminRangeCell);
+                $('#sales-variable tbody').append(newRow);
             }
 
-            var fixedvalueInput = $('<input>').attr({
-                type: 'text',
-                class: 'form-control',
-                value: currencySymbol + ' ' + response.fixedvalue,
-                readonly: true
-            });
+            if (response.fixedvalue !== null) {
+                var taxon = response.fixedvalue;
+                if (selectionValue !== 'dynamic' && includeOnPrice && enableVat) {
+                    var newCalculation = parseFloat(response.fixedvalue) + (vatPercentage * parseFloat(response.fixedvalue)) / 100;
+                    taxon = newCalculation;
+                }
 
-            var fixedvalueCell = $('<td>').append(fixedvalueInput);
-            newRow.append(pricenameCell, fixedvalueCell);
-            $('#sales-variable tbody').append(newRow);
-        }
+                var newRow = $('<tr>');
+                var pricenameCell = $('<td>').html("Price Name: " + response.pricename + "<br> Min Range: " + response.dynamicminRange + " ,Max range: " + response.dynamicmaxRange);
 
-        if (response.multiplePayments === "true") {
-    var newRow = $('<tr>');
-    var sliderCell = $('<td>').attr('colspan', '2').css('width', '100%');
+                var currencySymbol = getCurrencySymbol(response.currency);
+                var fixedValueInput = taxon;
+                var fixedvalueInput = $('<input>').attr({
+                    type: 'text',
+                    class: 'form-control',
+                    value: currencySymbol + ' ' + taxon.toFixed(2),
+                    readonly: true
+                });
 
-    var valueLabel = $('<label>').text('Payment Range: ').css('display', 'inline-block').css('margin-right', '10px');
-    var valueSpan = $('<span>').attr('id', 'sliderValue').css('display', 'none').css('margin-left', '10px');
-
-    valueLabel.appendTo(sliderCell);
-    var sliderContainer = $('<div>').css({
-        'display': 'inline-block',
-        'width': '70%',
-        'vertical-align': 'middle'
-    });
-    var slider = $('<div>').css('width', '100%');
-    slider.appendTo(sliderContainer);
-    sliderContainer.appendTo(sliderCell);
-    valueSpan.appendTo(sliderCell);
-    sliderCell.appendTo(newRow);
-    $('#sales-variable tbody').append(newRow);
-
-    noUiSlider.create(slider[0], {
-        start: [paymentMaxRange !== undefined ? paymentMaxRange : response.paymentMaxRange],
-        connect: [true, false],
-        range: {
-            'min': paymentMinRange !== undefined ? paymentMinRange : response.paymentMinRange,
-            'max': paymentMaxRange !== undefined ? paymentMaxRange : response.paymentMaxRange
-        },
-        behaviour: 'unconstrained-tap',
-        tooltips: {
-            to: function(value) {
-                return Math.round(value);
-            },
-            from: function(value) {
-                return Math.round(value);
+                var fixedvalueCell = $('<td>').append(fixedvalueInput);
+                newRow.append(pricenameCell, fixedvalueCell);
+                $('#sales-variable tbody').append(newRow);
             }
-        }
-    });
 
-    slider[0].noUiSlider.on('update', function(values, handle) {
-        var maxRange = parseInt(values[0]);
+            if (response.multiplePayments === "true") {
+                var newRow = $('<tr>');
+                var sliderCell = $('<td>').attr('colspan', '2').css('width', '100%');
 
-        $('#sliderValue').text('(Max value: ' + maxRange + ')').attr('title', 'Current Max Value: ' + maxRange);
-        priceJsonData.paymentMaxRange = maxRange;
+                var valueLabel = $('<label>').text('Payment Number: ').css('display', 'inline-block').css('margin-right', '10px');
+                var valueSpan = $('<span>').attr('id', 'sliderValue').css('display', 'none').css('margin-left', '10px');
 
-        // Now we build the table based on the updated slider value
-        var selectedFixedValueDiv = document.getElementById("ImpostaTable1");
-        selectedFixedValueDiv.innerHTML = '';
+                valueLabel.appendTo(sliderCell);
+                var sliderContainer = $('<div>').css({
+                    'display': 'inline-block',
+                    'width': '70%',
+                    'vertical-align': 'middle'
+                });
+                var slider = $('<div>').css('width', '100%');
+                slider.appendTo(sliderContainer);
+                sliderContainer.appendTo(sliderCell);
+                valueSpan.appendTo(sliderCell);
+                sliderCell.appendTo(newRow);
+                $('#sales-variable tbody').append(newRow);
 
-        var dynamicminRange = response.dynamicminRange;
-        var fixedvalue = response.fixedvalue;
-        var currency = response.currency;
-        var frequency = response.frequency;
-        var EditableDates = response.EditableDates;
-        var minRangeSlider = response.dynamicminRange;
+                noUiSlider.create(slider[0], {
+                    start: [currentMaxRange],
+                    connect: [true, false],
+                    range: {
+                        'min': paymentMinRange !== undefined ? paymentMinRange : response.paymentMinRange,
+                        'max': currentMaxRange
+                    },
+                    behaviour: 'unconstrained-tap',
+                    tooltips: {
+                        to: function(value) {
+                            return Math.round(value);
+                        },
+                        from: function(value) {
+                            return Math.round(value);
+                        }
+                    }
+                });
 
-        var selectionValue = dynamicminRange != null ? 'dynamic' : 'fixed';
-        console.log('selectionValue**********************imp**********-----------------', selectionValue);
-
-        // Declare includeOnPrice and enableVat inside this scope
-        var includeOnPrice = response.price === "true";
-        console.log('includeOnPrice**********************imp**********-----------------', includeOnPrice);
-
-        var vatPercentage = response.vatPercentage;
-        console.log('vatPercentage**********************imp**********-----------------', vatPercentage);
-        var enableVat = response.enableVat === "true";
-        console.log('enableVat**********************imp**********-----------------', enableVat);
-
-        // Ensure includeOnPrice and enableVat are boolean
-        includeOnPrice = Boolean(includeOnPrice);
-        enableVat = Boolean(enableVat);
-
-        console.log('Before condition - includeOnPrice:', includeOnPrice, 'enableVat:', enableVat);
-
-        if (selectionValue === 'dynamic') {
-            var minRangeSliderCAL = parseFloat(minRangeSlider) + (vatPercentage * parseFloat(minRangeSlider)) / 100;
-
-            if (includeOnPrice && enableVat) {
-                console.log('Using minRangeSliderCAL calculation');
-                var importo = (minRangeSliderCAL / maxRange).toFixed(2);
-            } else {
-                console.log('Using minRangeSlider calculation');
-                var importo = (minRangeSlider / maxRange).toFixed(2);
+                slider[0].noUiSlider.on('update', function(values, handle) {
+                    //currentMaxRange = parseInt(values[0]);
+                    currentMaxRange = Math.round(values[0]);
+                    updateTable(currentMaxRange, currentDynamicMinRange, response, priceJsonData);
+                });
             }
+
+///***** */
+function updateTable(maxRange, dynamicMinRange, response, priceJsonData) {
+    $('#sliderValue').text('(Max value: ' + maxRange + ')').attr('title', 'Current Max Value: ' + maxRange);
+    priceJsonData.paymentMaxRange = maxRange;
+
+    var selectedFixedValueDiv = document.getElementById("ImpostaTable1");
+    selectedFixedValueDiv.innerHTML = '';
+
+    var fixedvalue = response.fixedvalue;
+    var currency = response.currency;
+    var frequency = response.frequency;
+    var EditableDates = response.EditableDates;
+
+    var selectionValue = dynamicMinRange !== null ? 'dynamic' : 'fixed';
+    console.log('selectionValue:', selectionValue);
+
+    var includeOnPrice = response.price === "true";
+    console.log('includeOnPrice:', includeOnPrice);
+
+    var vatPercentage = response.vatPercentage;
+    console.log('vatPercentage:', vatPercentage);
+    var enableVat = response.enableVat === "true";
+    console.log('enableVat:', enableVat);
+
+    includeOnPrice = Boolean(includeOnPrice);
+    enableVat = Boolean(enableVat);
+
+    var minRangeSliderCAL = null;
+    var newCalculation = null;
+    var vatAmount = null;
+
+    if (selectionValue === 'dynamic' && includeOnPrice && enableVat) {
+        minRangeSliderCAL = parseFloat(dynamicMinRange) + (vatPercentage * parseFloat(dynamicMinRange)) / 100;
+        vatAmount = minRangeSliderCAL - parseFloat(dynamicMinRange);
+    }
+
+    if (selectionValue === 'fixed' && includeOnPrice && enableVat) {
+        newCalculation = parseFloat(fixedvalue) + (vatPercentage * parseFloat(fixedvalue)) / 100;
+        vatAmount = newCalculation - parseFloat(fixedvalue);
+    }
+
+    var importo;
+    if (selectionValue === 'dynamic') {
+        if (minRangeSliderCAL !== null) {
+            importo = (minRangeSliderCAL / maxRange).toFixed(2);
         } else {
-            if (includeOnPrice && enableVat) {
-                console.log('Using newcalculation calculation');
-                var importo = (newcalculation / maxRange).toFixed(2);
-            } else {
-                console.log('Using fixedValueInput calculation');
-                var importo = (fixedValueInput / maxRange).toFixed(2);
-            }
+            importo = (dynamicMinRange / maxRange).toFixed(2);
         }
-
-        var maxRangeVal = response.multiplePayments === "true" ? maxRange : 1;
-        var table = document.createElement('table');
-        table.className = 'table';
-
-        var thead = table.createTHead();
-        var headerRow = thead.insertRow();
-
-        var colName = selectionValue === 'dynamic'
-            ? 'Il costo totale di ' + getCurrencySymbol(currency) + ' ' + minRangeSlider + ' + IVA sarà corrisposto con le seguenti modalità:'
-            : 'Il costo totale di ' + getCurrencySymbol(currency) + ' ' + fixedValueInput + ' + IVA sarà corrisposto con le seguenti modalità:';
-
-        var th = document.createElement('th');
-        th.textContent = colName;
-        th.colSpan = 5;
-        headerRow.appendChild(th);
-
-        var tbody = table.createTBody();
-        for (var i = 1; i <= maxRangeVal; i++) {
-            var row = tbody.insertRow();
-            var descrizione = 'Rata ' + i + ' in ' + getCurrencySymbol(currency);
-
-            var importo;
-            if (selectionValue === 'dynamic') {
-                var minRangeSliderCAL = parseFloat(minRangeSlider) + (vatPercentage * parseFloat(minRangeSlider)) / 100;
-
-                if (includeOnPrice && enableVat) {
-                    importo = (minRangeSliderCAL / maxRange).toFixed(2);
-                } else {
-                    importo = (minRangeSlider / maxRange).toFixed(2);
-                }
-            } else {
-                if (includeOnPrice && enableVat) {
-                    importo = (newcalculation / maxRange).toFixed(2);
-                } else {
-                    importo = (fixedValueInput / maxRange).toFixed(2);
-                }
-            }
-
-            var importoInput = document.createElement('input');
-            importoInput.classList.add('form-control');
-            importoInput.type = 'number';
-            importoInput.style = "width: 100px;";
-            importoInput.value = importo;
-
-            importoInput.addEventListener('input', function() {
-                var inputVal = parseFloat(this.value);
-
-                var newImporto;
-                if (selectionValue === 'dynamic') {
-                    var minRangeSliderCAL = parseFloat(minRangeSlider) + (vatPercentage * parseFloat(minRangeSlider)) / 100;
-
-                    if (includeOnPrice && enableVat) {
-                        newImporto = (minRangeSliderCAL - inputVal) / (maxRange - 1);
-                    } else {
-                        newImporto = (minRangeSlider - inputVal) / (maxRange - 1);
-                    }
-                } else {
-                    if (includeOnPrice && enableVat) {
-                        newImporto = (newcalculation - inputVal) / (maxRange - 1);
-                    } else {
-                        newImporto = (fixedValueInput - inputVal) / (maxRange - 1);
-                    }
-                }
-
-                var allInputs = tbody.getElementsByTagName('input');
-                for (var j = 0; j < allInputs.length; j++) {
-                    if (allInputs[j] !== this) {
-                        allInputs[j].value = newImporto.toFixed(2);
-                    }
-                }
-            });
-
-            var dovutoIl = getDateByFrequency(frequency, i);
-
-            var dovutoIlInput = document.createElement('input');
-            dovutoIlInput.classList.add('form-control');
-            dovutoIlInput.style = "width: 128px;";
-            dovutoIlInput.type = 'date';
-
-            var parts = dovutoIl.split('/');
-            var yyyy_mm_dd = parts[2] + '-' + parts[1].padStart(2, '0') + '-' + parts[0].padStart(2, '0');
-            dovutoIlInput.value = yyyy_mm_dd;
-
-            dovutoIlInput.addEventListener('change', function() {
-                var rowIndex = Array.from(this.parentNode.parentNode.parentNode.children).indexOf(this.parentNode.parentNode);
-                var selectedDate = new Date(this.value);
-
-                for (var k = rowIndex + 1; k < tbody.rows.length; k++) {
-                    var nextDate = new Date(selectedDate);
-                    switch (frequency) {
-                        case 'daily':
-                            nextDate.setDate(nextDate.getDate() + 1);
-                            break;
-                        case 'biweekly':
-                            nextDate.setDate(nextDate.getDate() + (14 * 1));
-                            break;
-                        case 'weekly':
-                            nextDate.setDate(nextDate.getDate() + (7 * 1));
-                            break;
-                        case 'monthly':
-                            nextDate.setMonth(nextDate.getMonth() + 1);
-                            break;
-                        case 'annually':
-                            nextDate.setFullYear(nextDate.getFullYear() + 1);
-                            break;
-                        default:
-                            break;
-                    }
-                    var yyyy_mm_dd = nextDate.toISOString().split('T')[0];
-
-                    tbody.rows[k].cells[4].querySelector('input[type="date"]').value = yyyy_mm_dd;
-                    selectedDate = nextDate;
-                }
-            });
-
-            var calculatedValnew;
-
-            if (enableVat && includeOnPrice) {
-                calculatedValnew = "IVA Inc.";
-            } else if (!includeOnPrice && enableVat) {
-                calculatedValnew = "+ IVA " + vatPercentage + "%";
-            } else {
-                calculatedValnew = "";
-            }
-
-            var cells = EditableDates === 'true'
-                ? [descrizione, importoInput, calculatedValnew, 'entro il ', dovutoIlInput]
-                : [descrizione, importoInput, calculatedValnew, 'entro il ', dovutoIl];
-
-            cells.forEach(function(cellData) {
-                var cell = row.insertCell();
-                if (typeof cellData === 'object') {
-                    cell.appendChild(cellData);
-                } else {
-                    cell.textContent = cellData;
-                }
-            });
+    } else {
+        if (newCalculation !== null) {
+            importo = (newCalculation / maxRange).toFixed(2);
+        } else {
+            importo = (fixedvalue / maxRange).toFixed(2);
         }
+    }
 
-            selectedFixedValueDiv.appendChild(table);
+    // Use maxRange directly from the slider to synchronize the tooltip value
+    var maxRangeVal = Math.round(maxRange);
+
+    var table = document.createElement('table');
+    table.className = 'table';
+
+    var thead = table.createTHead();
+    var headerRow = thead.insertRow();
+
+    var colName;
+    var totalhere;
+    if (selectionValue === 'dynamic') {
+        if (minRangeSliderCAL !== null) {
+            colName = 'Il costo totale di ' + getCurrencySymbol(currency) + ' ' + minRangeSliderCAL.toFixed(2) + ' (IVA Compresa ' + getCurrencySymbol(currency) + ' ' + vatAmount.toFixed(2) + ') sarà corrisposto con le seguenti modalità:';
+            totalhere = parseFloat(minRangeSliderCAL.toFixed(2));
+        } else {
+            colName = 'Il costo totale di ' + getCurrencySymbol(currency) + ' ' + dynamicMinRange + ' + IVA sarà corrisposto con le seguenti modalità:';
+            totalhere = parseFloat(dynamicMinRange);
+        }
+    } else {
+        if (newCalculation !== null) {
+            colName = 'Il costo totale di ' + getCurrencySymbol(currency) + ' ' + newCalculation.toFixed(2) + ' (IVA Compresa ' + getCurrencySymbol(currency) + ' ' + vatAmount.toFixed(2) + ') sarà corrisposto con le seguenti modalità:';
+            totalhere = parseFloat(newCalculation.toFixed(2));
+        } else {
+            colName = 'Il costo totale di ' + getCurrencySymbol(currency) + ' ' + fixedvalue + ' + IVA sarà corrisposto con le seguenti modalità:';
+            totalhere = parseFloat(fixedvalue);
+        }
+    }
+
+    var th = document.createElement('th');
+    th.textContent = colName;
+    th.colSpan = 5;
+    headerRow.appendChild(th);
+
+    var tbody = table.createTBody();
+    for (var i = 1; i <= maxRangeVal; i++) {
+        var row = tbody.insertRow();
+        var descrizione = 'Rata ' + i + ' in ' + getCurrencySymbol(currency);
+
+        var importoInput = document.createElement('input');
+        importoInput.classList.add('form-control', 'importoInput');
+        importoInput.type = 'number';
+        importoInput.style = "width: 100px;";
+        importoInput.value = importo;
+
+        importoInput.addEventListener('input', function() {
+            var newValue = parseFloat(this.value);
+            var currentRow = this.closest('tr');
+            var previousRows = $(currentRow).prevAll();
+            var subsequentRows = $(currentRow).nextAll();
+
+            var previousTotal = 0;
+            previousRows.each(function() {
+                var prevValue = parseFloat($(this).find('.importoInput').val());
+                previousTotal += isNaN(prevValue) ? 0 : prevValue;
+            });
+
+            var remainingAmount = totalhere - (newValue + previousTotal);
+            var remainingRowsCount = subsequentRows.length;
+            var distributedValue = remainingRowsCount > 0 ? (remainingAmount / remainingRowsCount).toFixed(2) : 0;
+
+            subsequentRows.each(function() {
+                $(this).find('.importoInput').val(distributedValue);
+            });
+
+            updateGlobalArrays();
         });
- 
+
+        var dovutoIl = getDateByFrequency(frequency, i);
+
+        var dovutoIlInput = document.createElement('input');
+        dovutoIlInput.classList.add('form-control', 'dovutoIlInput');
+        dovutoIlInput.style = "width: 128px;";
+        dovutoIlInput.type = 'date';
+
+        var parts = dovutoIl.split('/');
+        var yyyy_mm_dd = parts[2] + '-' + parts[1].padStart(2, '0') + '-' + parts[0].padStart(2, '0');
+        dovutoIlInput.value = yyyy_mm_dd;
+
+        dovutoIlInput.addEventListener('change', function() {
+            updateGlobalArrays();
+        });
+
+        dovutoIlInput.addEventListener('change', function() {
+            var rowIndex = Array.from(this.parentNode.parentNode.parentNode.children).indexOf(this.parentNode.parentNode);
+            var selectedDate = new Date(this.value);
+
+            for (var k = rowIndex + 1; k < tbody.rows.length; k++) {
+                var nextDate = new Date(selectedDate);
+                switch (frequency) {
+                    case 'daily':
+                        nextDate.setDate(nextDate.getDate() + 1);
+                        break;
+                    case 'biweekly':
+                        nextDate.setDate(nextDate.getDate() + (14 * 1));
+                        break;
+                    case 'weekly':
+                        nextDate.setDate(nextDate.getDate() + (7 * 1));
+                        break;
+                    case 'monthly':
+                        nextDate.setMonth(nextDate.getMonth() + 1);
+                        break;
+                    case 'annually':
+                        nextDate.setFullYear(nextDate.getFullYear() + 1);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        });
+
+        var calculatedValnew;
+
+        if (enableVat && includeOnPrice) {
+            calculatedValnew = "IVA Inc.";
+        } else if (!includeOnPrice && enableVat) {
+            calculatedValnew = "+ IVA " + vatPercentage + "%";
+        } else {
+            calculatedValnew = "";
+        }
+
+        var cells = EditableDates === 'true'
+            ? [descrizione, importoInput, calculatedValnew, 'entro il ', dovutoIlInput]
+            : [descrizione, importoInput, calculatedValnew, 'entro il ', dovutoIl];
+
+        cells.forEach(function(cellData) {
+            var cell = row.insertCell();
+            if (typeof cellData === 'object') {
+                cell.appendChild(cellData);
+            } else {
+                cell.textContent = cellData;
+            }
+        });
+    }
+
+    selectedFixedValueDiv.appendChild(table);
+
+    updateGlobalArrays();
+
+    $('.importoInput').on('input', function() {
+        updateGlobalArrays();
+    });
+
+    $('.dovutoIlInput').on('change', function() {
+        updateGlobalArrays();
+    });
 }
+
+
+//************ */
+
     },
     error: function(xhr, status, error) {
         console.error(xhr.responseText);
@@ -1255,12 +1238,79 @@ var paymentMinRange;
 
         });
 
+
+        function updateGlobalArrays() {
+                // Clear the arrays before populating with new values
+                dueDateValues = [];
+                amountValues = [];
+
+                // Extract values from importoInput elements
+                $('.importoInput').each(function() {
+                    amountValues.push($(this).val());
+                });
+
+                // Extract values from dovutoIlInput elements
+                $('.dovutoIlInput').each(function() {
+                    dueDateValues.push($(this).val());
+                });
+
+                console.log('Updated dueDateValues:', dueDateValues);
+                console.log('Updated amountValues:', amountValues);
+            }
+
+
+            function collectPriceValues() {
+            // First, update the global arrays to capture the latest values
+            updateGlobalArrays();
+
+            // Convert priceJsonData.price to a boolean
+            var includeOnPrice = priceJsonData.price === "true";
+
+            // Now create the priceValues object with additional properties
+            var priceValues = {
+                dynamicminRange: priceJsonData.dynamicminRange || null,
+                fixedvalue: priceJsonData.fixedvalue || null,
+                paymentMinRange: priceJsonData.paymentMinRange,
+                paymentMaxRange: priceJsonData.paymentMaxRange,
+                currency: priceJsonData.currency,
+                frequency: priceJsonData.frequency,
+                includeonprice: includeOnPrice,
+                vatpercentage: priceJsonData.vatPercentage,
+                payments: []
+            };
+
+            // Collect payments details from the table
+            $('#sales-variable tbody tr').each(function(index, row) {
+                var cells = $(row).find('td');
+                if (cells.length > 1) {
+                    var payment = {
+                        description: cells.eq(0).text(),
+                        amount: parseFloat(cells.eq(1).find('input').val()),
+                        vatIncluded: cells.eq(2).text(),
+                        dueDate: cells.eq(4).find('input').val() || cells.eq(4).text()
+                    };
+                    priceValues.payments.push(payment);
+                }
+            });
+
+            // Add the global arrays to the priceValues object
+            priceValues.dueDateValues = dueDateValues;
+            priceValues.amountValues = amountValues;
+
+            console.log('Updated price value object:', priceValues);
+            return priceValues;
+        }
+
+
+
+             
+
   
-
-        $('#updateButton').on('click', function() {
-            update();
-        });
-
+    $('#updateButton').on('click', function() {
+                if (validateTableFields()) {
+                    update();
+                }
+    });
         
     function update() {
         var updatedVariableData = [];
@@ -1298,6 +1348,7 @@ var paymentMinRange;
             }
         });
 
+        var priceValues = collectPriceValues();
         var savePriceJsonDataPromise = $.ajax({
             url: '/save-pricejson-data',
             type: 'POST',
@@ -1306,7 +1357,8 @@ var paymentMinRange;
             },
             data: {
                 priceJsonData: JSON.stringify(priceJsonData),
-                id: id
+                id: id,
+                priceValues: priceValues 
             }
         });
 
@@ -1325,6 +1377,22 @@ var paymentMinRange;
         }).fail(function(xhr, status, error) {
         
             console.error('Error:', error);
+
+            console.error(error);
+
+            var response = xhr.responseJSON;
+
+            // Display the detailed error using SweetAlert2
+                Swal.fire({
+                    icon: 'error', // Type of the alert
+                    title: 'Error',
+                    html: `
+                        <p>${response.error}</p>
+                        <p><strong>Total Check:</strong> ${response.totalCheck}</p>
+                        <p><strong>Expected Total:</strong> ${response.expectedTotal}</p>
+                    `,
+                    footer: 'Please try again later or contact support if the issue persists.'
+                });
         });
     }
 

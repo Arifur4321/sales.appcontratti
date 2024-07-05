@@ -1257,10 +1257,9 @@
                     <p class="mb-2">
                         <script>
                             document.write(new Date().getFullYear())
-                        </script> © Skote. Design & Develop by Themesbrand
+                        </script>  Design & Develop by Codice 1%
                     </p>
-                    <p>It will be as simple as occidental in fact, it will be to an english person, it will seem like
-                        simplified English, as a skeptical</p>
+                    
                 </div>
 
             </div>

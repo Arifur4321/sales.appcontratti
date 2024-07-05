@@ -19,7 +19,7 @@
         "laravel/tinker": "^2.8",
         "laravel/ui": "^4.2",
         "league/oauth2-client": "^2.7",
-        "mpdf/mpdf": "^6.0",
+        "mpdf/mpdf": "^8.2",
         "setasign/fpdf": "^1.8",
         "setasign/fpdi": "^2.6",
         "smalot/pdfparser": "^2.10",

@@ -178,47 +178,14 @@
                     </ul>
                 </li> -->
 
+              
+
+                
                 <li>
-                    <a href="javascript: void(0);" class="has-arrow waves-effect">
-                        <i class="bx bx-briefcase-alt-2"></i>
-                        <span key="t-projects">@lang('translation.Projects')</span>
+                    <a href="/Your-Lists" key="Your-Lists" class="waves-effect">
+                        <i class="bx bx-file"></i>
+                        <span>@lang('translation.Your-Lists')</span>
                     </a>
-                    <ul class="sub-menu" aria-expanded="false">
-                        <!-- <li><a href="projects-grid" key="t-p-grid">@lang('translation.Projects_Grid')</a></li>
-                        
-                        <li><a href="projects-list" key="t-p-list">@lang('translation.Projects_List')</a></li>
-
-                        <li><a href="/arifurtable" key="arifurtable-list">@lang('translation.arifurtable')</a></li> -->
-         
-                         <!-- <li><a href="/createcontract" key="createcontract-list">@lang('translation.createcontract')</a></li> -->
-                        
-                        <!-- <li><a href="/Contract-List" key="Contract-List">@lang('translation.Contract-List')</a></li> -->
-
-                        
-                        <!-- <li><a href="Edit-Contract-List" key="Edit-Contract-List">@lang('translation.Edit-Contract-List')</a></li>   -->
-
-                        <!-- <li><a href="/Product-List" key="Product-List">@lang('translation.Product-List')</a></li> -->
-                        
-                        <!-- <li><a href="/Variable-List" key="Variable-List">@lang('translation.Variable-List')</a></li>  -->
-                        <!-- <li><a href="/Price-List" key="Price-List">@lang('translation.Price-List')</a></li>   -->
-
-                        <!-- <li><a href="/Sales-Details" key="Sales-Details">@lang('translation.Sales-Details')</a></li>   -->
-
-                        <!-- <li><a href="/Sales-Lists" key="Sales-Lists">@lang('translation.Sales-Lists')</a></li>  -->
-                        
-                 
-                        <li><a href="/Your-Lists" key="Your-Lists">@lang('translation.Your-Lists')</a></li>     
-                        <li><a href="/Send-New-Contracts" key="Send-New-Contracts">@lang('translation.Send-New-Contracts')</a></li>     
-                        <!-- <li><a href="/Edit-New-Contracts" key="Edit-New-Contracts">@lang('translation.Edit-New-Contracts')</a></li>    -->
-                        
-                        <!-- <li><a href="/Add-New-Price" key="Add-New-Price">@lang('translation.Add-New-Price')</a></li>    -->
-            
-                        <!-- <li><a href="/HeaderAndFooter" key="HeaderAndFooter">@lang('translation.HeaderAndFooter')</a></li>    -->
-
-                        <!-- <li><a href="projects-overview" key="t-p-overview">@lang('translation.Project_Overview')</a>
-                        </li>
-                        <li><a href="projects-create" key="t-create-new">@lang('translation.Create_New')</a></li> -->
-                    </ul>
                 </li>
 
                 <!-- <li>

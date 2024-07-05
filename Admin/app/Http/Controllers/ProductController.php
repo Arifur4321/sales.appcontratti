@@ -39,8 +39,12 @@ use Dompdf\Options;
 use DateTime; 
 
 use TCPDF;
-use phpQuery;
+use phpQuery; 
+use App\Models\HeaderAndFooter;
  
+use Illuminate\Support\Facades\Log;
+
+use App\Models\HeaderAndFooterContractpage;
  
 use setasign\Fpdi\Fpdi;
 use setasign\Fpdi\PdfParser\StreamReader;
@@ -57,200 +61,446 @@ use setasign\Fpdi\PdfParser\Type\PdfString;
  
  use setasign\Fpdi\PdfParser\PdfParser;
  
-   
-use Mpdf;
+use Mpdf\MpdfException;
+use Mpdf\Mpdf;
+
+
+ 
+ 
+use Dropbox\Sign\Api\SignatureRequestApi;
+use Dropbox\Sign\ApiException;
+
+use Dropbox\Sign\Configuration;
 
 class ProductController extends Controller
 {
 
-    //------------------------------
+    protected $signatureRequestApi;
 
-    // working fine only for firma qui photo position
-private function processImageTags($htmlContent)
-{
-    // Define regex patterns for different image tags
-    $patterns = [
-        'right' => '/<figure class="image image-style-side"><img[^>]*><\/figure>/i',
-        'left' => '/<p><img[^>]*><\/p>/i',
-        'middle' => '/<figure class="image"><img[^>]*><\/figure>/i'
-    ];
-
-    foreach ($patterns as $position => $pattern) {
-        preg_match_all($pattern, $htmlContent, $matches);
-
-        foreach ($matches[0] as $imgTag) {
-            // Extract src, width, and height attributes
-            preg_match('/src="([^"]*)"/i', $imgTag, $srcMatch);
-            preg_match('/width="([^"]*)"/i', $imgTag, $widthMatch);
-            preg_match('/height="([^"]*)"/i', $imgTag, $heightMatch);
-
-            $src = $srcMatch[1] ?? '';
-            $width = $widthMatch[1] ?? '';
-            $height = $heightMatch[1] ?? '';
-
-            // Generate the new image tag based on the position
-            switch ($position) {
-                case 'right':
-                    $newImgTag = "<div style=\"text-align: right;\"><img style=\"aspect-ratio:{$width}/{$height};\" src=\"{$src}\" width=\"{$width}\" height=\"{$height}\"></div>";
-                    break;
-                case 'left':
-                    $newImgTag = "<div style=\"text-align: left;\"><img src=\"{$src}\" width=\"{$width}\" height=\"{$height}\"></div>";
-                    break;
-                case 'middle':
-                default:
-                    $newImgTag = "<div style=\"text-align: center;\"><img style=\"aspect-ratio:{$width}/{$height};\" src=\"{$src}\" width=\"{$width}\" height=\"{$height}\"></div>";
-                    break;
-            }
-
-            // Replace the old image tag with the new one in the HTML content
-            $htmlContent = str_replace($imgTag, $newImgTag, $htmlContent);
-        }
+    public function __construct()
+    {   
+        $config = Configuration::getDefaultConfiguration();
+        $config->setUsername(env('HELLOSIGN_API_KEY'));
+        $this->signatureRequestApi = new SignatureRequestApi($config);
     }
 
-    return $htmlContent;
-}
+    public function getSignedPdfUrl($id)
+    {
+        $item = SalesListDraft::findOrFail($id);
 
+        if ($item->status == 'signed') {
+            try {
+                $result = $this->signatureRequestApi->signatureRequestFilesAsFileUrl($item->envelope_id);
+                $fileUrl = $result->getFileUrl();
+
+                if ($fileUrl) {
+                    return response()->json(['success' => true, 'file_url' => $fileUrl]);
+                } else {
+                    return response()->json(['success' => false, 'message' => 'Failed to retrieve the signed PDF URL.']);
+                }
+            } catch (ApiException $e) {
+                $error = $e->getResponseObject();
+                return response()->json(['success' => false, 'message' => 'Failed to retrieve the signed PDF URL: ' . print_r($error->getError(), true)]);
+            }
+        }
+
+        return response()->json(['success' => false, 'message' => 'Item is not signed or could not fetch link']);
+    }
+
+
+    //------------------------------
+
+ 
+    // new one 
+    private function processImageTags($htmlContent)
+    {
+        // Define regex patterns for different image tags
+        $patterns = [
+            'right' => '/<figure class="image image-style-side"><img[^>]*><\/figure>/i',
+            'left' => '/<p><img[^>]*><\/p>/i',
+            'middle' => '/<figure class="image"><img[^>]*><\/figure>/i'
+        ];
+    
+        foreach ($patterns as $position => $pattern) {
+            preg_match_all($pattern, $htmlContent, $matches);
+    
+            foreach ($matches[0] as $imgTag) {
+                // Extract src, width, and height attributes
+                preg_match('/src="([^"]*)"/i', $imgTag, $srcMatch);
+                preg_match('/width="([^"]*)"/i', $imgTag, $widthMatch);
+                preg_match('/height="([^"]*)"/i', $imgTag, $heightMatch);
+    
+                $src = $srcMatch[1] ?? '';
+                $width = $widthMatch[1] ?? '';
+                $height = $heightMatch[1] ?? '';
+    
+                // Generate the new image tag based on the position
+                switch ($position) {
+                    case 'right':
+                        $newImgTag = "<img src=\"{$src}\" width=\"{$width}\" height=\"{$height}\" style=\"float: right; margin: 10px;\">";
+                        break;
+                    case 'left':
+                        $newImgTag = "<img src=\"{$src}\" width=\"{$width}\" height=\"{$height}\" style=\"float: left; margin: 10px;\">";
+                        break;
+                    case 'middle':
+                    default:
+                        $newImgTag = "<div style=\"text-align: center;\"><img src=\"{$src}\" width=\"{$width}\" height=\"{$height}\" style=\"display: inline-block;\"></div>";
+                        break;
+                }
+    
+                // Replace the old image tag with the new one in the HTML content
+                $htmlContent = str_replace($imgTag, $newImgTag, $htmlContent);
+            }
+        }
+    
+        return $htmlContent;
+    }
    
-public function generatePdfforSales(Request $request)
+
+ //***** */
+
+    /**
+     * Function to format date to dd/mm/yyyy
+     */
+  public  function formatDateToDDMMYYYY($dateString) {
+        // Check if the date string is valid
+        if (!$dateString) {
+            return '';
+        }
+        
+        // Convert the date string to a DateTime object
+        $date = DateTime::createFromFormat('Y-m-d', $dateString);
+        if (!$date) {
+            // If the date format is not Y-m-d, try other common formats
+            $date = DateTime::createFromFormat('Y-m-d H:i:s', $dateString);
+        }
+
+        // If still no valid DateTime object, return original string
+        if (!$date) {
+            return htmlspecialchars($dateString);
+        }
+        
+        // Format the date to dd/mm/yyyy
+        return $date->format('d/m/Y');
+    }
+
+
+
+ public function generatePdfforSales(Request $request)
 {
-    $selectedContract = $request->input('selectedContractId');
-    $contract = Contract::select('editor_content')->find($selectedContract);
+    // Validate the request input
+    $request->validate([
+        'selectedContractId' => 'required',
+        'variableValues' => 'array',
+        'priceValues' => 'array',
+        'id' => 'integer|nullable',
+    ]);
+
+    $contractIdentifier = $request->input('selectedContractId');
+
+    // Fetch the contract by ID or name
+    if (is_numeric($contractIdentifier)) {
+        $contract = Contract::select('editor_content')->find($contractIdentifier);
+    } else {
+        $contract = Contract::where('contract_name', $contractIdentifier)->first();
+    }
 
     if (!$contract) {
         return response()->json(['error' => 'Contract not found'], 404);
     }
 
+    $contractID = is_numeric($contractIdentifier) ? $contractIdentifier : $contract->id;
     $htmlContent = $contract->editor_content;
+
+  
+
     $variableValues = $request->input('variableValues', []);
 
     // Replace placeholders with actual values from variableValues
-    if ($variableValues) {
-        foreach ($variableValues as $name => $variable) {
-            $placeholder = '%' . $name . '%';
-            $value = $variable['value'] ?? null;
+    foreach ($variableValues as $name => $variable) {
+         $placeholder = '%' . $name . '%';
+       
+       $value = htmlspecialchars($variable['value'] ?? '');
 
-            if ($value !== null) {
-                if ($variable['type'] === 'Multiple Box') {
-                    // Format the multiple box values with bullet points
-                    $valueArray = explode(',', $value);
-                    $formattedValue = '<ul>';
-                    foreach ($valueArray as $item) {
-                        $formattedValue .= '<li>' . htmlspecialchars($item) . '</li>';
-                    }
-                    $formattedValue .= '</ul>';
-                    $htmlContent = str_replace($placeholder, $formattedValue, $htmlContent);
-                } else {
-                    $htmlContent = str_replace($placeholder, htmlspecialchars($value), $htmlContent);
+        // Handle Multiple Box type
+        if (isset($variable['type'])) {
+            if ($variable['type'] === 'Multiple Box') {
+                $valueArray = explode(',', $value);
+                $formattedValue = '<ul>';
+                foreach ($valueArray as $item) {
+                    $formattedValue .= '<li>' . htmlspecialchars($item) . '</li>';
                 }
+                $formattedValue .= '</ul>';
+                $htmlContent = str_replace($placeholder, $formattedValue, $htmlContent);
+            } elseif ($variable['type'] === 'Dates') {
+                // Handle Dates type
+
+                $dueDate = DateTime::createFromFormat('Y-m-d', $value);
+                $formattedDate = $dueDate ? $dueDate->format('d/m/Y') : htmlspecialchars($dueDateValues[$i]);
+ 
+                $htmlContent = str_replace($placeholder, $formattedDate, $htmlContent);
+            } else {
+                // Handle other types
+                $htmlContent = str_replace($placeholder, $value, $htmlContent);
             }
+        } else {
+            $htmlContent = str_replace($placeholder, $value, $htmlContent);
         }
     }
 
+      /*
+    
+    
+    $variableValues = $request->input('variableValues', []);
+ 
+    foreach ($variableValues as $name => $variable) {
+        $placeholder = '%' . $name . '%';
+        $value = htmlspecialchars($variable['value'] ?? '');
+
+ 
+        if (isset($variable['type']) && $variable['type'] === 'Multiple Box') {
+            $valueArray = explode(',', $value);
+            $formattedValue = '<ul>';
+            foreach ($valueArray as $item) {
+                $formattedValue .= '<li>' . htmlspecialchars($item) . '</li>';
+            }
+            $formattedValue .= '</ul>';
+            $htmlContent = str_replace($placeholder, $formattedValue, $htmlContent);
+        } else {
+            $htmlContent = str_replace($placeholder, $value, $htmlContent);
+        }
+    }
+   */
+
+    /************************************ */
+
+    // Replace $PRICE$ placeholder with price details
     $priceValues = $request->input('priceValues', []);
 
-    // Replace $PRICE$ placeholder in HTML content with priceValues details
-    if ($priceValues) {
-        $formattedPrice = '';
+    $price = '$PRICE$';
 
-        if (isset($priceValues['dynamicminRange']) && $priceValues['dynamicminRange'] !== null) {
-            $totalPrice = htmlspecialchars($priceValues['dynamicminRange']);
-        } elseif (isset($priceValues['fixedvalue']) && $priceValues['fixedvalue'] !== null) {
-            $totalPrice = htmlspecialchars($priceValues['fixedvalue']);
+    // Initialize the formatted prices string
+    $formattedPrices = '';
+
+    if (is_array($priceValues)) {
+        // Extract relevant details from the priceValues array
+        $dynamicminRange = htmlspecialchars($priceValues['dynamicminRange'] ?? $priceValues['fixedvalue'] ?? '');
+        $currency = htmlspecialchars($priceValues['currency']);
+        $paymentMaxRange = htmlspecialchars($priceValues['paymentMaxRange']);
+        $frequency = htmlspecialchars($priceValues['frequency']);
+        $payments = $priceValues['payments'];
+
+        $amountValues = $priceValues['amountValues'];
+        $dueDateValues = $priceValues['dueDateValues'];
+
+        // Convert includeonprice to boolean
+        $includeonprice = filter_var($priceValues['includeonprice'], FILTER_VALIDATE_BOOLEAN);
+        $vatpercentage = $priceValues['vatpercentage'];
+
+        // Start forming the HTML content
+        $formattedPrices .= '<ul>';
+
+        // Calculate the VAT-inclusive price if includeonprice is true
+        if ($includeonprice) {
+            $priceWithVat = (floatval($vatpercentage) * floatval($dynamicminRange) / 100) + floatval($dynamicminRange);
+            $priceWithVatFormatted = number_format($priceWithVat, 2, ',', '.');
+            $formattedPrices .= '<li>Il prezzo totale di ' . $priceWithVatFormatted . ' ' . $currency . ' (IVA Compresa) sarà corrisposto con le seguenti modalità:</li>';
         } else {
-            $totalPrice = 0;
+            $formattedPrices .= '<li>Il prezzo totale di ' . $dynamicminRange . ' ' . $currency . ' + IVA sarà corrisposto con le seguenti modalità:</li>';
         }
 
-        $currency = $priceValues['currency'];
-        $frequency = $priceValues['frequency'];
+        $totalCheck = 0;
 
-        $formattedPrice .= "<br><li>Il prezzo totale di {$totalPrice}€ + IVA sarà corrisposto con le seguenti modalità:</li>";
+        for ($i = 0; $i < $paymentMaxRange; $i++) {
+            // Retrieve the corresponding amount and due date from the arrays
+            $formattedPaymentAmount = number_format(floatval($amountValues[$i]), 2, ',', '.');
+            
+            
+            //$formattedDueDate = htmlspecialchars($dueDateValues[$i]);
 
-        // Process the payments
-        if ($priceValues) {
-            $formattedPrice .= '<ul>';
+            $dueDate = DateTime::createFromFormat('Y-m-d', $dueDateValues[$i]);
+            $formattedDueDate = $dueDate ? $dueDate->format('d/m/Y') : htmlspecialchars($dueDateValues[$i]);
+        
 
-            $maxRange = $priceValues['paymentMaxRange'];
-            $vatPercentage = 0.22; // Example VAT percentage
-            $includeOnPrice = true;
-            $enableVat = true;
+            $paymentAmount = floatval($amountValues[$i]);
+            $totalCheck += $paymentAmount;
 
-            for ($i = 1; $i <= $maxRange; $i++) {
-                $amount = $totalPrice / $maxRange;
-                $amount = number_format($amount, 2, '.', ''); // Format to 2 decimal places
-                $dueDate = $this->getDateByFrequency($frequency, $i);
-
-                $formattedPrice .= "<li>Pagamento {$i} di €{$amount} + IVA entro il {$dueDate}</li>";
-            }
-
-            $formattedPrice .= '</ul>';
+            // Format each payment into an HTML list item
+            $formattedPrices .= '<li>Pagamento ' . ($i + 1) . ' di ' . $currency . ' ' . $formattedPaymentAmount . ' + IVA entro il ' . $formattedDueDate . '</li>';
         }
 
-        $htmlContent = str_replace('$PRICE$', $formattedPrice, $htmlContent);
+        // Check if totalCheck matches the expected total based on includeonprice
+        $expectedTotal = $includeonprice ? $priceWithVat : floatval($dynamicminRange);
+        
+        // Allow a discrepancy of up to 0.80
+
+        $acceptableDifference = 0.80;
+
+        if (abs($totalCheck - $expectedTotal) > $acceptableDifference) {
+            return response()->json([
+                'error' => 'PDF generation failed because the total installment is not the same as the full price',
+                'totalCheck' => $totalCheck,
+                'expectedTotal' => $expectedTotal,
+                'difference' => abs($totalCheck - $expectedTotal)
+            ], 500);
+        }
+        
+        $formattedPrices .= '</ul>';
+    } else {
+        // If it's not an array, just convert it to a string
+        $formattedPrices = htmlspecialchars($priceValues);
     }
+
+    // Replace $PRICE$ in the HTML content with the formatted price string
+    $htmlContent = str_replace($price, $formattedPrices, $htmlContent);
+
+    // Process image tags to use absolute URLs
     $htmlContent = $this->processImageTags($htmlContent);
 
-    // Set options to allow for remote file access
-    $options = new Options();
-    $options->set('isRemoteEnabled', true);
+    // Fetch header and footer content
+    $config = HeaderAndFooterContractpage::where('contractID', $contractID)->first();
 
-    $dompdf = new Dompdf($options);
-    $dompdf->set_option('isHtml5ParserEnabled', true);
+    $headerContent = '';
+    $footerContent = '';
 
-    // Update image paths to be absolute URLs
-    $htmlContent = str_replace('src="http://localhost:8000/media/', 'src="' . public_path('media') . '/', $htmlContent);
-
-    $dompdf->loadHtml($htmlContent);
-    $dompdf->setPaper('A4', 'portrait');
-    $dompdf->render();
-    $pdfContent = $dompdf->output();
-    $filename = 'contract_' . time() . '.pdf';
-
-    // Check if ID is provided
-    $id = $request->input('id');
-
-    if ($id) {
-        // If ID is provided, save the PDF name inside the record with the provided ID
-        $record = SalesListDraft::find($id);
-
-        if ($record) {
-            // Delete the existing PDF file, if it exists
-            if ($record->selected_pdf_name) {
-                Storage::disk('public')->delete('pdf/' . $record->selected_pdf_name);
+    if ($config) {
+        if ($config->HeaderID) {
+            $headerData = HeaderAndFooter::find($config->HeaderID);
+            if ($headerData) {
+                $headerContent = $headerData->editor_content;
             }
-
-            // Save the PDF name in the selected_pdf_name column
-            $record->update(['selected_pdf_name' => $filename]);
-        } else {
-            return response()->json(['error' => 'Record not found'], 404);
-        }
-    } else {
-        // If ID is not provided, check if a PDF with the same name exists and delete it
-        $existingPdf = SalesListDraft::where('selected_pdf_name', $filename)->first();
-
-        if ($existingPdf) {
-            Storage::disk('public')->delete('pdf/' . $filename);
         }
 
-        // Save the PDF name in the selected_pdf_name column of the last row
-        $lastRow = SalesListDraft::latest()->first();
-
-        if ($lastRow) {
-            $lastRow->update(['selected_pdf_name' => $filename]);
-        } else {
-            SalesListDraft::create(['selected_pdf_name' => $filename]);
+        if ($config->FooterID) {
+            $footerData = HeaderAndFooter::find($config->FooterID);
+            if ($footerData) {
+                $footerContent = $footerData->editor_content;
+            }
         }
     }
 
-    // Save the PDF file
-    Storage::disk('public')->put('pdf/' . $filename, $pdfContent);
-    $pdfUrl = Storage::url('pdf/' . $filename);
+    // Fallback content if header and footer are not found
+    if (empty($headerContent)) {
+        $headerContent = '<div style="text-align: center; font-weight: bold;"></div>';
+    } else {
+        $headerContent = '<div style="text-align: center; font-weight: bold;">' . $headerContent . '</div>';
+    }
+    if (empty($footerContent)) {
+        $footerContent = '<div style="text-align: center;"></div>';
+    } else {
+        $footerContent = '<div style="text-align: center;">' . $footerContent . '</div>';
+    }
 
-    // Store the HTML content in session for later use
-    session(['html_content' => $htmlContent]);
+    try {
+        // Create new mPDF document
+        $mpdf = new \Mpdf\Mpdf([
+            'format' => 'A4',
+            'margin_top' => $headerContent ? 40 : 5,
+            'margin_bottom' => $footerContent ? 40 : 5,
+            'margin_left' => 15,
+            'margin_right' => 15,
+        ]);
 
-    return response()->json(['pdf_url' => $pdfUrl]);
+        // Set document properties
+        $mpdf->SetTitle('Contract PDF');
+        $mpdf->SetAuthor('Your Company');
+
+        $mpdf->SetWatermarkText('Giacomo Freddi');
+        $mpdf->showWatermarkText = true;
+        $mpdf->watermark_font = 'DejaVuSansCondensed';
+        $mpdf->watermarkTextAlpha = 0.1;
+
+        // Set header and footer content
+        $mpdf->SetHTMLHeader($headerContent);
+
+        $italianTimezone = new \DateTimeZone('Europe/Rome');
+        $dateTime = new \DateTime('now', $italianTimezone);
+        $formattedDateTime = $dateTime->format('d-m-Y H:i:s');
+
+        $footerHTML = '
+            <div style="width: 100%; font-size: 10px; display: flex; justify-content: space-between; align-items: center; position: relative;">
+                <div style="flex: 1; text-align: center;">' . $footerContent . '</div>
+                <div style="flex: 1; text-align: right;">Page {PAGENO}/{nbpg}</div>
+            </div>
+        ';
+
+        $mpdf->SetHTMLFooter($footerHTML);
+
+        // Add CSS for content styling, including table borders
+        $contentHTML = '
+            <style>
+                body { font-family: Arial, sans-serif; font-size: 12px; }
+                ul { padding-left: 20px; }
+                li { margin-bottom: 5px; }
+                img { max-width: 100%; height: auto; display: block; margin: auto; }
+                table { width: 100%; border-collapse: collapse; }
+                table, th, td { border: 1px solid black; }
+                th, td { padding: 8px; text-align: left; }
+            </style>
+            <div>' . $htmlContent . '</div>';
+
+  
+
+        // Write the HTML content to the PDF
+        $mpdf->WriteHTML($contentHTML);
+
+        // Define the filename
+        $filename = 'contract_' . time() . '.pdf';
+
+        // Check if ID is provided
+        $id = $request->input('id');
+
+        if ($id) {
+            // If ID is provided, save the PDF name inside the record with the provided ID
+            $record = SalesListDraft::find($id);
+
+            if ($record) {
+                // Delete the existing PDF file, if it exists
+                if ($record->selected_pdf_name) {
+                    Storage::disk('public')->delete('pdf/' . $record->selected_pdf_name);
+                }
+
+                // Save the PDF name in the selected_pdf_name column
+                $record->update(['selected_pdf_name' => $filename]);
+            } else {
+                return response()->json(['error' => 'Record not found'], 404);
+            }
+        } else {
+            // If ID is not provided, check if a PDF with the same name exists and delete it
+            $existingPdf = SalesListDraft::where('selected_pdf_name', $filename)->first();
+
+            if ($existingPdf) {
+                Storage::disk('public')->delete('pdf/' . $filename);
+            }
+
+            // Save the PDF name in the selected_pdf_name column of the last row
+            $lastRow = SalesListDraft::latest()->first();
+
+            if ($lastRow) {
+                $lastRow->update(['selected_pdf_name' => $filename]);
+            } else {
+                SalesListDraft::create(['selected_pdf_name' => $filename]);
+            }
+        }
+
+        $pdfFilePath = 'pdf/' . $filename;
+
+        // Save the PDF file to storage
+        Storage::disk('public')->put($pdfFilePath, $mpdf->Output('', 'S'));
+
+        session(['html_content' => $htmlContent]);
+
+        // Return the URL to the generated PDF
+        return response()->json(['pdf_url' => Storage::url($pdfFilePath)]);
+
+    } catch (\Mpdf\MpdfException $e) {
+        // Handle mPDF exception
+   
+        return response()->json(['error' => 'PDF generation failed', 'message' => $e->getMessage()], 500);
+    }
 }
 
+// *****************for sending pdf to signer email with changing firma qui photo to signer tag 
 public function sendDocumentForSignature(Request $request)
 {
     $pdfUrl = $request->input('pdfUrl');
@@ -269,52 +519,151 @@ public function sendDocumentForSignature(Request $request)
     // Process image tags to ensure positions are set
     $htmlContent = $this->processImageTags($htmlContent);
 
-    // Replace all image tags with the specific signature tag while keeping the alignment
+    // Replace the specific image tags with the signature tag
     $htmlContent = $this->replaceImageTagsWithSignatureTag($htmlContent);
 
-    // Generate the PDF from the modified HTML content
-    $options = new Options();
-    $options->set('isRemoteEnabled', true);
+    // Fetch the contract by ID or name
+    $contractIdentifier = $request->input('selectedContractId');
+    $contract = null;
+    $contractID = null;
 
-    $dompdf = new Dompdf($options);
-    $dompdf->set_option('isHtml5ParserEnabled', true);
-    $dompdf->loadHtml($htmlContent);
-    $dompdf->setPaper('A4', 'portrait');
-    $dompdf->render();
-    $pdfContent = $dompdf->output();
-    $filename = 'contract_' . time() . '.pdf';
-    $absolutePath = public_path('pdf/' . $filename);
+    if (is_numeric($contractIdentifier)) {
+        $contract = Contract::select('editor_content')->find($contractIdentifier);
+        $contractID = $contractIdentifier;
+    } else {
+        $contract = Contract::where('contract_name', $contractIdentifier)->first();
+        if ($contract) {
+            $contractID = $contract->id;
+        }
+    }
 
-    // Save the generated PDF file
-    file_put_contents($absolutePath, $pdfContent);
+    if (!$contract) {
+        return response()->json(['error' => 'Contract not found'], 404);
+    }
 
-    $client = new \HelloSign\Client(env('HELLOSIGN_API_KEY'));
-    $signatureRequest = new \HelloSign\SignatureRequest();
-    $signatureRequest->setTitle('Please sign this document');
-    $signatureRequest->setSubject('Document Signature Request');
-    $signatureRequest->setMessage('Please sign this document and let us know if you have any questions.');
-    $signatureRequest->addSigner(new \HelloSign\Signer([
-        'email_address' => $recipientEmail,
-        'name' => $recipientName
-    ]));
-    $signatureRequest->addFile($absolutePath);
+    // Fetch header and footer content, similar to the generatePdfforSales method
+    $config = HeaderAndFooterContractpage::where('contractID', $contractID)->first();
 
-    // Enable Text Tags and optionally hide them
-    $signatureRequest->setUseTextTags(true);
-    $signatureRequest->setHideTextTags(true); // Optionally set this to true
+    $headerContent = '';
+    $footerContent = '';
+
+    if ($config) {
+        if ($config->HeaderID) {
+            $headerData = HeaderAndFooter::find($config->HeaderID);
+            if ($headerData) {
+                $headerContent = $headerData->editor_content;
+            }
+        }
+
+        if ($config->FooterID) {
+            $footerData = HeaderAndFooter::find($config->FooterID);
+            if ($footerData) {
+                $footerContent = $footerData->editor_content;
+            }
+        }
+    }
+
+    // Fallback content if header and footer are not found
+    $headerContent = empty($headerContent) ? '<div style="text-align: center; font-weight: bold;"></div>' : '<div style="text-align: center; font-weight: bold;">' . $headerContent . '</div>';
+    $footerContent = empty($footerContent) ? '<div style="text-align: center;"></div>' : '<div style="text-align: center;">' . $footerContent . '</div>';
 
     try {
+        // Create new mPDF document
+        $mpdf = new \Mpdf\Mpdf([
+            'format' => 'A4',
+            'margin_top' => $headerContent ? 40 : 5,
+            'margin_bottom' => $footerContent ? 40 : 5,
+            'margin_left' => 15,
+            'margin_right' => 15,
+        ]);
+
+        // Set document properties
+        $mpdf->SetTitle('Document for Signature');
+        $mpdf->SetAuthor('Your Company');
+
+        // Set watermark if needed
+        $mpdf->SetWatermarkText('Giacomo Freddi');
+        $mpdf->showWatermarkText = true;
+        $mpdf->watermark_font = 'DejaVuSansCondensed';
+        $mpdf->watermarkTextAlpha = 0.1;
+
+        // Set header and footer content
+        $mpdf->SetHTMLHeader($headerContent);
+
+        $italianTimezone = new \DateTimeZone('Europe/Rome');
+        $dateTime = new \DateTime('now', $italianTimezone);
+        $formattedDateTime = $dateTime->format('d-m-Y H:i:s');
+
+        $footerHTML = '
+            <div style="width: 100%; font-size: 10px; display: flex; justify-content: space-between; align-items: center; position: relative;">
+                <div style="flex: 1; text-align: center;">' . $footerContent . '</div>
+                <div style="flex: 1; text-align: right;">Page {PAGENO}/{nbpg}</div>
+            </div>
+        ';
+
+        $mpdf->SetHTMLFooter($footerHTML);
+
+        // Add CSS for content styling, including table borders
+        $contentHTML = '
+            <style>
+                body { font-family: Arial, sans-serif; font-size: 12px; }
+                ul { padding-left: 20px; }
+                li { margin-bottom: 5px; }
+                img { max-width: 100%; height: auto; display: block; margin: auto; }
+                table { width: 100%; border-collapse: collapse; }
+                table, th, td { border: 1px solid black; }
+                th, td { padding: 8px; text-align: left; }
+                div.sig-container { margin: 10px; display: flex; justify-content: center; align-items: center; height: 50px; } /* Ensure the tag is on one line */
+                div.sig-container.float-right { justify-content: flex-end; }
+                div.sig-container.float-left { justify-content: flex-start; }
+            </style>
+            <div>' . $htmlContent . '</div>';
+
+        // Write the HTML content to the PDF
+        $mpdf->WriteHTML($contentHTML);
+
+        // Define the filename
+        $filename = 'contract_' . time() . '.pdf';
+        $pdfFilePath = 'pdf/' . $filename;
+
+        // Save the PDF file to storage
+        Storage::disk('public')->put($pdfFilePath, $mpdf->Output('', 'S'));
+
+        // Send the PDF to Dropbox Sign for signature
+        $client = new \HelloSign\Client(env('HELLOSIGN_API_KEY'));
+        $signatureRequest = new \HelloSign\SignatureRequest();
+        $signatureRequest->setTitle('Please sign this document');
+        $signatureRequest->setSubject('Document Signature Request');
+        $signatureRequest->setMessage('Please sign this document and let us know if you have any questions.');
+        $signatureRequest->addSigner(new \HelloSign\Signer([
+            'email_address' => $recipientEmail,
+            'name' => $recipientName
+        ]));
+        $signatureRequest->addFile(storage_path('app/public/' . $pdfFilePath));
+
+        // Enable Text Tags and optionally hide them
+        $signatureRequest->setUseTextTags(true);
+        $signatureRequest->setHideTextTags(true); // Optionally set this to true
+
         $response = $client->sendSignatureRequest($signatureRequest);
         $envelopeId = $response->getId();
         $signatureUrl = "https://app.hellosign.com/sign/$envelopeId";
 
+        // Update the database with the new document details
         $draftUpdated = false;
         if ($id) {
             $salesListDraft = SalesListDraft::find($id);
             if ($salesListDraft) {
+                // Delete the existing PDF file, if it exists
+                if ($salesListDraft->selected_pdf_name) {
+                    Storage::disk('public')->delete('pdf/' . $salesListDraft->selected_pdf_name);
+                }
+
+                // Update with new details
                 $salesListDraft->envelope_id = $envelopeId;
                 $salesListDraft->recipient_email = $recipientEmail;
                 $salesListDraft->status = 'pending';
+                $salesListDraft->selected_pdf_name = $filename;
                 $salesListDraft->save();
                 $draftUpdated = true;
             }
@@ -323,25 +672,26 @@ public function sendDocumentForSignature(Request $request)
         if (!$draftUpdated) {
             $lastRow = SalesListDraft::latest()->first();
             if ($lastRow) {
+                // Update the last row if it exists
                 $lastRow->envelope_id = $envelopeId;
                 $lastRow->recipient_email = $recipientEmail;
                 $lastRow->status = 'pending';
+                $lastRow->selected_pdf_name = $filename;
                 $lastRow->save();
             } else {
-                $salesListDraft = new SalesListDraft();
-                $salesListDraft->envelope_id = $envelopeId;
-                $salesListDraft->recipient_email = $recipientEmail;
-                $salesListDraft->status = 'pending';
-                $salesListDraft->save();
+                // Create a new record if no rows exist
+                SalesListDraft::create([
+                    'envelope_id' => $envelopeId,
+                    'recipient_email' => $recipientEmail,
+                    'status' => 'pending',
+                    'selected_pdf_name' => $filename
+                ]);
             }
         }
-
-       // $whatsAppSent = $this->sendWhatsAppMessage($recipientMobile, $signatureUrl);
 
         $responseMessage = [
             'envelope_id' => $envelopeId,
             'email_status' => 'Email sent successfully.',
-            //'whatsapp_status' => $whatsAppSent ? 'WhatsApp message sent successfully.' : 'Failed to send WhatsApp message.'
         ];
 
         return response()->json($responseMessage);
@@ -351,213 +701,31 @@ public function sendDocumentForSignature(Request $request)
     }
 }
 
-private function replaceImageTagsWithSignatureTag($content)
-{
-    // Define the regex patterns for the different image tags
-    $patterns = [
-        'right' => '/<div style="text-align: right;">(<img[^>]*>)<\/div>/i',
-        'left' => '/<div style="text-align: left;">(<img[^>]*>)<\/div>/i',
-        'middle' => '/<div style="text-align: center;">(<img[^>]*>)<\/div>/i'
-    ];
+    private function replaceImageTagsWithSignatureTag($content)
+    {
+        // Define the regex pattern for the specific image src attribute
+        $pattern = '/<img[^>]*src="https:\/\/i\.ibb\.co\/71g553C\/FIRMA-QUI\.jpg"[^>]*>/i';
 
-    // Replace each pattern with the signer tag while keeping the alignment
-    foreach ($patterns as $pattern) {
+        // Replace each pattern with the signer tag while keeping the alignment
         $content = preg_replace_callback($pattern, function ($matches) {
-            return str_replace($matches[1], '[sig|req|signer1]', $matches[0]);
+            // Extract style attribute if present
+            preg_match('/style="([^"]*)"/i', $matches[0], $styleMatch);
+            $style = $styleMatch[1] ?? '';
+
+            // Determine position from the style and ensure the signer tag fits within a single line
+            if (strpos($style, 'float: right;') !== false) {
+                return '<div class="sig-container float-right" style="margin: 10px;">[sig|req|signer1]</div>';
+            } elseif (strpos($style, 'float: left;') !== false) {
+                return '<div class="sig-container float-left" style="margin: 10px;">[sig|req|signer1]</div>';
+            } else {
+                // Default to centered if no specific style is detected
+                return '<div class="sig-container" style="margin: 10px;">[sig|req|signer1]</div>';
+            }
         }, $content);
+
+        return $content;
     }
-
-    return $content;
-}
-
-
-
-
-   // working dropbox signer tag  
-    // public function sendDocumentForSignature(Request $request)
-    // {
-    //     $pdfUrl = $request->input('pdfUrl');
-    //     $recipientEmail = $request->input('recipientEmail');
-    //     $recipientName = $request->input('recipientName');
-    //     $recipientMobile = $request->input('recipientMobile');
-    //     $id = $request->input('id');
-    //     $absolutePath = public_path($pdfUrl);
-
-    //     if (!file_exists($absolutePath)) {
-    //         return response()->json(['error' => 'File does not exist or invalid path.'], 400);
-    //     }
-
-    //     $client = new \HelloSign\Client(env('HELLOSIGN_API_KEY'));
-    //     $signatureRequest = new \HelloSign\SignatureRequest();
-    //     $signatureRequest->setTitle('Please sign this document');
-    //     $signatureRequest->setSubject('Document Signature Request');
-    //     $signatureRequest->setMessage('Please sign this document and let us know if you have any questions.');
-    //     $signatureRequest->addSigner(new \HelloSign\Signer([
-    //         'email_address' => $recipientEmail,
-    //         'name' => $recipientName
-    //     ]));
-    //     $signatureRequest->addFile($absolutePath);
-
-    //     // Enable Text Tags and optionally hide them
-    //     $signatureRequest->setUseTextTags(true);
-    //     $signatureRequest->setHideTextTags(true); // Optionally set this to true
-
-    //     try {
-    //         $response = $client->sendSignatureRequest($signatureRequest);
-    //         $envelopeId = $response->getId();
-    //         $signatureUrl = "https://app.hellosign.com/sign/$envelopeId";
-
-    //         $draftUpdated = false;
-    //         if ($id) {
-    //             $salesListDraft = SalesListDraft::find($id);
-    //             if ($salesListDraft) {
-    //                 $salesListDraft->envelope_id = $envelopeId;
-    //                 $salesListDraft->recipient_email = $recipientEmail;
-    //                 $salesListDraft->status = 'pending';
-    //                 $salesListDraft->save();
-    //                 $draftUpdated = true;
-    //             }
-    //         }
-
-    //         if (!$draftUpdated) {
-    //             $lastRow = SalesListDraft::latest()->first();
-    //             if ($lastRow) {
-    //                 $lastRow->envelope_id = $envelopeId;
-    //                 $lastRow->recipient_email = $recipientEmail;
-    //                 $lastRow->status = 'pending';
-    //                 $lastRow->save();
-    //             } else {
-    //                 $salesListDraft = new SalesListDraft();
-    //                 $salesListDraft->envelope_id = $envelopeId;
-    //                 $salesListDraft->recipient_email = $recipientEmail;
-    //                 $salesListDraft->status = 'pending';
-    //                 $salesListDraft->save();
-    //             }
-    //         }
-
-    //         $whatsAppSent = $this->sendWhatsAppMessage($recipientMobile, $signatureUrl);
-
-    //         $responseMessage = [
-    //             'envelope_id' => $envelopeId,
-    //             'email_status' => 'Email sent successfully.',
-    //             'whatsapp_status' => $whatsAppSent ? 'WhatsApp message sent successfully.' : 'Failed to send WhatsApp message.'
-    //         ];
-
-    //         return response()->json($responseMessage);
-
-    //     } catch (\Exception $e) {
-    //         return response()->json(['error' => $e->getMessage()], 500);
-    //     }
-    // }
-
-
-    // both email / dropbox and whats app /twilio is working fine separately *****************------------------
-    // public function sendDocumentForSignature(Request $request)
-    // {
-    //     $pdfUrl = $request->input('pdfUrl');
-    //     $recipientEmail = $request->input('recipientEmail');
-    //     $recipientName = $request->input('recipientName');
-    //     $recipientMobile = $request->input('recipientMobile');
-    //     $id = $request->input('id');
-    //     $absolutePath = public_path($pdfUrl);
  
-
-    //     if (!file_exists($absolutePath)) {
-    //         return response()->json(['error' => 'File does not exist or invalid path.'], 400);
-    //     }
-
-    //     $client = new \HelloSign\Client(env('HELLOSIGN_API_KEY'));
-    //     $signatureRequest = new \HelloSign\SignatureRequest();
-    //     $signatureRequest->setTitle('Please sign this document');
-    //     $signatureRequest->setSubject('Document Signature Request');
-    //     $signatureRequest->setMessage('Please sign this document and let us know if you have any questions.');
-    //     $signatureRequest->addSigner(new \HelloSign\Signer([
-    //         'email_address' => $recipientEmail,
-    //         'name' => $recipientName
-    //     ]));
-    //     $signatureRequest->addFile($absolutePath);
-
- 
-  
-    //     $formFields = [
-    //         [
-    //             'api_id' => 'signature1',
-    //             'name' => 'Signature 1',
-    //             'type' => 'signature',
-    //             'x' => 390,
-    //             'y' => 150,
-    //             'width' => 133,
-    //             'height' => 101,
-    //             'required' => true,
-    //             'page' => 1,
-    //             'signer' => 0
-    //         ],
-    //         [
-    //             'api_id' => 'signature2',
-    //             'name' => 'Signature 2',
-    //             'type' => 'signature',
-    //             'x' => 300,
-    //             'y' => 300,
-    //             'width' => 133,
-    //             'height' => 101,
-    //             'required' => true,
-    //             'page' => 2,
-    //             'signer' => 0
-    //         ]
-    //     ];
-
- 
-
-    //   //  $signatureRequest->setFormFieldsPerDocument([$formFields]);
-
-    //     try {
-    //         $response = $client->sendSignatureRequest($signatureRequest);
-    //         $envelopeId = $response->getId();
-    //         $signatureUrl = "https://app.hellosign.com/sign/$envelopeId";
-
-    //         $draftUpdated = false;
-    //         if ($id) {
-    //             $salesListDraft = SalesListDraft::find($id);
-    //             if ($salesListDraft) {
-    //                 $salesListDraft->envelope_id = $envelopeId;
-    //                 $salesListDraft->recipient_email = $recipientEmail;
-    //                 $salesListDraft->status = 'pending';
-    //                 $salesListDraft->save();
-    //                 $draftUpdated = true;
-    //             }
-    //         }
-
-    //         if (!$draftUpdated) {
-    //             $lastRow = SalesListDraft::latest()->first();
-    //             if ($lastRow) {
-    //                 $lastRow->envelope_id = $envelopeId;
-    //                 $lastRow->recipient_email = $recipientEmail;
-    //                 $lastRow->status = 'pending';
-    //                 $lastRow->save();
-    //             } else {
-    //                 $salesListDraft = new SalesListDraft();
-    //                 $salesListDraft->envelope_id = $envelopeId;
-    //                 $salesListDraft->recipient_email = $recipientEmail;
-    //                 $salesListDraft->status = 'pending';
-    //                 $salesListDraft->save();
-    //             }
-    //         }
-
-    //         $whatsAppSent = $this->sendWhatsAppMessage($recipientMobile, $signatureUrl);
-
-    //         $responseMessage = [
-    //             'envelope_id' => $envelopeId,
-    //             'email_status' => 'Email sent successfully.',
-    //             'whatsapp_status' => $whatsAppSent ? 'WhatsApp message sent successfully.' : 'Failed to send WhatsApp message.'
-    //         ];
-
-    //         return response()->json($responseMessage);
-
-    //     } catch (\Exception $e) {
-    //         return response()->json(['error' => $e->getMessage()], 500);
-    //     }
-    // }
-
     // For whats app message method 
 
     private function sendWhatsAppMessage($recipientMobile, $signatureUrl)
@@ -585,227 +753,6 @@ private function replaceImageTagsWithSignatureTag($content)
         }
     }
 
-
-
-    
-
-    // working both with hellosign and  twilo whatsapp message  ******************************------------
-    // public function sendDocumentForSignature(Request $request)
-    // {
-    //     $pdfUrl = $request->input('pdfUrl');
-    //     $recipientEmail = $request->input('recipientEmail');
-    //     $recipientName = $request->input('recipientName');
-    //     $recipientMobile = $request->input('recipientMobile'); // Get recipient mobile number
-    //     $id = $request->input('id'); // Retrieve the id if provided
-    
-    //     // Assuming the pdfUrl is a relative path from the public directory
-    //     $absolutePath = public_path($pdfUrl);
-    
-    //     // Verify the file exists
-    //     if (!file_exists($absolutePath)) {
-    //         return response()->json(['error' => 'File does not exist or invalid path.'], 400);
-    //     }
-    
-    //     $client = new \HelloSign\Client(env('HELLOSIGN_API_KEY'));
-    
-    //     $signatureRequest = new \HelloSign\SignatureRequest();
-    //     $signatureRequest->setTitle('Please sign this document');
-    //     $signatureRequest->setSubject('Document Signature Request');
-    //     $signatureRequest->setMessage('Please sign this document and let us know if you have any questions.');
-    //     $signatureRequest->addSigner(new \HelloSign\Signer([
-    //         'email_address' => $recipientEmail,
-    //         'name' => $recipientName
-    //     ]));
-    //     $signatureRequest->addFile($absolutePath);
-    
-    //     // Enable test mode
-    //     $signatureRequest->enableTestMode();
-
-
-    //   // Define form fields per document to add signature field using coordinate 
-
-    //     $formFields = [
-    //             [
-    //                 'api_id' => 'signature1',
-    //                 'name' => 'Signature 1',
-    //                 'type' => 'signature',
-    //                 'x' => 100,
-    //                 'y' => 150,
-    //                 'page' => 1,
-    //                 'signer' => 0
-    //             ],
-    //             [
-    //                 'api_id' => 'signature2',
-    //                 'name' => 'Signature 2',
-    //                 'type' => 'signature',
-    //                 'x' => 200,
-    //                 'y' => 300,
-    //                 'page' => 2,
-    //                 'signer' => 0
-    //             ]
-    //         ];
-        
-    //         $signatureRequest->setFormFieldsPerDocument($formFields);
-    
-    //     try {
-    //         $response = $client->sendSignatureRequest($signatureRequest);
-    //         $envelopeId = $response->getId();
-    //         $signatureUrl = "https://app.hellosign.com/sign/$envelopeId";
-    
-    //         if ($id) {
-    //             // Find and update the existing record by ID
-    //             $salesListDraft = SalesListDraft::find($id);
-    //             if ($salesListDraft) {
-    //                 $salesListDraft->envelope_id = $envelopeId;
-    //                 $salesListDraft->recipient_email = $recipientEmail;
-    //                 $salesListDraft->status = 'pending';
-    //                 $salesListDraft->save();
-    
-    //                 // Send WhatsApp message and check for success
-    //                 if ($this->sendWhatsAppMessage($recipientMobile, $signatureUrl)) {
-    //                     return response()->json(['envelope_id' => $envelopeId]);
-    //                 } else {
-    //                     return response()->json(['error' => 'Failed to send WhatsApp message.'], 500);
-    //                 }
-    //             }
-    //         }
-    
-    //         // If no ID provided or record not found, update the last row
-    //         $lastRow = SalesListDraft::latest()->first();
-    //         if ($lastRow) {
-    //             $lastRow->envelope_id = $envelopeId;
-    //             $lastRow->recipient_email = $recipientEmail;
-    //             $lastRow->status = 'pending';
-    //             $lastRow->save();
-    
-    //             // Send WhatsApp message and check for success
-    //             if ($this->sendWhatsAppMessage($recipientMobile, $signatureUrl)) {
-    //                 return response()->json(['envelope_id' => $envelopeId]);
-    //             } else {
-    //                 return response()->json(['error' => 'Failed to send WhatsApp message.'], 500);
-    //             }
-    //         } else {
-    //             // If no records exist at all, create a new one
-    //             $salesListDraft = new SalesListDraft();
-    //             $salesListDraft->envelope_id = $envelopeId;
-    //             $salesListDraft->recipient_email = $recipientEmail;
-    //             $salesListDraft->status = 'pending';
-    //             $salesListDraft->save();
-    
-    //             // Send WhatsApp message and check for success
-    //             if ($this->sendWhatsAppMessage($recipientMobile, $signatureUrl)) {
-    //                 return response()->json(['envelope_id' => $envelopeId]);
-    //             } else {
-    //                 return response()->json(['error' => 'Failed to send WhatsApp message.'], 500);
-    //             }
-    //         }
-    
-    //     } catch (\Exception $e) {
-    //         return response()->json(['error' => $e->getMessage()], 500);
-    //     }
-    // }
-    
-    // private function sendWhatsAppMessage($recipientMobile, $signatureUrl)
-    // {
-    //     $twilioSid = env('TWILIO_SID');
-    //     $twilioAuthToken = env('TWILIO_AUTH_TOKEN');
-    //     $twilioWhatsAppNumber = env('TWILIO_WHATSAPP_NUMBER');
-    
-    //     $twilio = new TwilioClient($twilioSid, $twilioAuthToken);
-    
-    //     $message = "Hello,We are from Codice 1% .Here is your Contract . please sign this document: $signatureUrl";
-    
-    //     try {
-    //         $twilio->messages->create(
-    //             "whatsapp:$recipientMobile",
-    //             [
-    //                 'from' => "whatsapp:$twilioWhatsAppNumber",
-    //                 'body' => $message
-    //             ]
-    //         );
-    //         return true;
-    //     } catch (\Exception $e) {
-    //         // Handle any errors that may occur
-    //         \Log::error('Error sending WhatsApp message: ' . $e->getMessage());
-    //         return false;
-    //     }
-    // }
-    
-    
-
-// 
-    // only for sending email with hello sign dropbox sign working*************************************************
-    // public function sendDocumentForSignature(Request $request)
-    // {
-    //     $pdfUrl = $request->input('pdfUrl');
-    //     $recipientEmail = $request->input('recipientEmail');
-    //     $recipientName = $request->input('recipientName');
-    //     $id = $request->input('id'); // Retrieve the id if provided
-
-    //     // Assuming the pdfUrl is a relative path from the public directory
-    //     $absolutePath = public_path($pdfUrl);
-
-    //     // Verify the file exists
-    //     if (!file_exists($absolutePath)) {
-    //         return response()->json(['error' => 'File does not exist or invalid path.'], 400);
-    //     }
-
-    //     $client = new Client(env('HELLOSIGN_API_KEY'));
-
-    //     $signatureRequest = new SignatureRequest();
-    //     $signatureRequest->setTitle('Please sign this document');
-    //     $signatureRequest->setSubject('Document Signature Request');
-    //     $signatureRequest->setMessage('Please sign this document and let us know if you have any questions.');
-    //     $signatureRequest->addSigner(new Signer([
-    //         'email_address' => $recipientEmail,
-    //         'name' => $recipientName
-    //     ]));
-    //     $signatureRequest->addFile($absolutePath);
-
-    //     // Enable test mode
-    //     $signatureRequest->enableTestMode();
-
-    //     try {
-    //         $response = $client->sendSignatureRequest($signatureRequest);
-    //         $envelopeId = $response->getId();
-
-    //         if ($id) {
-    //             // Find and update the existing record by ID
-    //             $salesListDraft = SalesListDraft::find($id);
-    //             if ($salesListDraft) {
-    //                 $salesListDraft->envelope_id = $envelopeId;
-    //                 $salesListDraft->recipient_email = $recipientEmail;
-    //                 $salesListDraft->status = 'pending';
-    //                 $salesListDraft->save();
-
-    //                 return response()->json(['envelope_id' => $envelopeId]);
-    //             }
-    //         }
-
-    //         // If no ID provided or record not found, update the last row
-    //         $lastRow = SalesListDraft::latest()->first();
-    //         if ($lastRow) {
-    //             $lastRow->envelope_id = $envelopeId;
-    //             $lastRow->recipient_email = $recipientEmail;
-    //             $lastRow->status = 'pending';
-    //             $lastRow->save();
-
-    //             return response()->json(['envelope_id' => $envelopeId]);
-    //         } else {
-    //             // If no records exist at all, create a new one
-    //             $salesListDraft = new SalesListDraft();
-    //             $salesListDraft->envelope_id = $envelopeId;
-    //             $salesListDraft->recipient_email = $recipientEmail;
-    //             $salesListDraft->status = 'pending';
-    //             $salesListDraft->save();
-
-    //             return response()->json(['envelope_id' => $envelopeId]);
-    //         }
-
-    //     } catch (\Exception $e) {
-    //         return response()->json(['error' => $e->getMessage()], 500);
-    //     }
-    // }
 
     // ********************************  
  
@@ -860,14 +807,56 @@ public function updateVariableData(Request $request)
     }
 }
 
-
-
     // for save variable json data in SalesListDraft table
     public function savePriceJsonData(Request $request)
     {
         // Get the variable data from the request
         $variableData = $request->input('priceJsonData');
         $id = $request->input('id');
+        $priceValues = $request->input('priceValues');
+
+/********** */
+        $dynamicminRange = htmlspecialchars($priceValues['dynamicminRange'] ?? $priceValues['fixedvalue'] ?? '');
+        $currency = htmlspecialchars($priceValues['currency']);
+        $paymentMaxRange = htmlspecialchars($priceValues['paymentMaxRange']);
+        $frequency = htmlspecialchars($priceValues['frequency']);
+        $payments = $priceValues['payments'];
+
+        $amountValues = $priceValues['amountValues'];
+        $dueDateValues = $priceValues['dueDateValues'];
+
+        // Convert includeonprice to boolean
+        $includeonprice = filter_var($priceValues['includeonprice'], FILTER_VALIDATE_BOOLEAN);
+        $vatpercentage = $priceValues['vatpercentage'];
+        $priceWithVat = (floatval($vatpercentage) * floatval($dynamicminRange) / 100) + floatval($dynamicminRange);
+
+        $totalCheck = 0;
+
+        for ($i = 0; $i < $paymentMaxRange; $i++) {
+            // Retrieve the corresponding amount and due date from the arrays
+            $formattedPaymentAmount = number_format(floatval($amountValues[$i]), 2, ',', '.');
+            $paymentAmount = floatval($amountValues[$i]);
+            $totalCheck += $paymentAmount;
+        }
+
+
+        $expectedTotal = $includeonprice ? $priceWithVat : floatval($dynamicminRange);
+        
+        // Allow a discrepancy of up to 0.80
+
+        $acceptableDifference = 0.80;
+
+        if (abs($totalCheck - $expectedTotal) > $acceptableDifference) {
+            return response()->json([
+                'error' => 'The total installment is not the same as the full price',
+                'totalCheck' => $totalCheck,
+                'expectedTotal' => $expectedTotal,
+                'difference' => abs($totalCheck - $expectedTotal)
+            ], 500);
+        }
+
+
+        //***** */
 
         $lastRow = SalesListDraft::latest()->first();
 
@@ -945,9 +934,7 @@ public function updateVariableData(Request $request)
        }
 
     
-
      // testing method
-
      public function generateHtmlToPDF()
      {
          $html = '<h1>Generate html to PDF</h1>
@@ -974,14 +961,8 @@ public function updateVariableData(Request $request)
         return response()->json(['message' => 'PDF deleted successfully']);
     }
 
- 
-  
- 
-
-
     //  work  fine for generate pdf with firma qui photo position
-    
-    
+        
 //     public function generatePdfforSales(Request $request)
 // {
 //     $selectedContract = $request->input('selectedContractId');

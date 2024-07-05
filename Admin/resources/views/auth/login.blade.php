@@ -25,7 +25,7 @@
                                     <div class="col-7">
                                         <div class="text-primary p-4">
                                             <h5 class="text-primary">Welcome Back !</h5>
-                                            <p>Sign in to continue to Skote.</p>
+                                            <p>Log in to continue to Appcontratti.</p>
                                         </div>
                                     </div>
                                     <div class="col-5 align-self-end">
@@ -48,8 +48,8 @@
                                     <a href="index" class="auth-logo-dark">
                                         <div class="avatar-md profile-user-wid mb-4">
                                             <span class="avatar-title rounded-circle bg-light">
-                                                <img src="{{ URL::asset('build/images/logo.svg') }}" alt=""
-                                                    class="rounded-circle" height="34">
+                                                <img src="{{ URL::asset('build/images/codice-logo.png') }}" alt=""
+                                                    class="rounded-circle" height="62">
                                             </span>
                                         </div>
                                     </a>
@@ -163,7 +163,7 @@
         <button class="btn btn-primary waves-effect waves-light" type="submit">Log In</button>
     </div>
 
-    <div class="mt-4 text-center">
+    <!-- <div class="mt-4 text-center">
         <h5 class="font-size-14 mb-3">Sign in with</h5>
 
         <ul class="list-inline">
@@ -183,7 +183,7 @@
                 </a>
             </li>
         </ul>
-    </div>
+    </div> -->
 </form> 
 
 
@@ -196,12 +196,12 @@
                         <div class="mt-5 text-center">
 
                             <div>
-                                <p>Don't have an account ? <a href="{{ url('register') }}" class="fw-medium text-primary">
-                                        Signup now </a> </p>
+                                <!-- <p>Don't have an account ? <a href="{{ url('register') }}" class="fw-medium text-primary">
+                                        Signup now </a> </p> -->
                                 <p>© <script>
                                         document.write(new Date().getFullYear())
 
-                                    </script> Skote. Crafted with <i class="mdi mdi-heart text-danger"></i> by Themesbrand
+                                    </script> Crafted with <i class="mdi mdi-heart text-danger"></i> by Codice 1%
                                 </p>
                             </div>
                         </div>

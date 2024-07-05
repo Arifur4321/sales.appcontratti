@@ -1,11 +1,16 @@
-<?php
+ <?php
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 Auth::routes(['verify' => true]);
 
-Route::get('/', [App\Http\Controllers\HomeController::class, 'root'])->name('root');
+//Route::get('/', [App\Http\Controllers\HomeController::class, 'root'])->name('root');
+
+Route::get('/', [App\Http\Controllers\HomeController::class, 'contractList'])->name('root');
+
+// You can still define the /Contract-List route if you want both URLs to be functional
+Route::get('/Your-Lists', [App\Http\Controllers\HomeController::class, 'contractList'])->name('contract.list');
 
 // customers route
 Route::get('/customers', [App\Http\Controllers\CustomerController::class, 'index'])->name('customers.list');
@@ -18,8 +23,6 @@ Route::post('/update-password/{id}', [App\Http\Controllers\HomeController::class
 Route::get('index/{locale}', [App\Http\Controllers\HomeController::class, 'lang']);
 
 // routes/web.php
-
-// routes/web.php or routes/api.php
  
 Route::post('/save-project', [App\Http\Controllers\ProjectController::class, 'saveProject']);
 
@@ -30,18 +33,6 @@ Route::post('/edit-variable/{id}', [App\Http\Controllers\ProductController::clas
 Route::get('/arifurtable', [App\Http\Controllers\ProjectController::class, 'showProjects']);
 
 // for Contractlist page  in office -----------------
-
-//route for sales details page
- 
-// testing now----
-
-//Route::post('/check-unique', 'SalesDetailsController@checkUnique')->name('check.unique');
- 
-// Route to handle password update form submission
-
-//Route::post('/SalesupdatePassword', [App\Http\Controllers\SalesDetailsAuthController::class, 'updatePassword']);
-
- 
 
 Route::post('/update-variable-json', [App\Http\Controllers\SalesListDraftController::class, 'updateVariableJson'])->name('update-variable-json');
 
@@ -62,15 +53,14 @@ Route::get('/get-all-priceLists', [App\Http\Controllers\ProductController::class
 
 Route::post('/save-pricejson-data', [App\Http\Controllers\ProductController::class, 'savePriceJsonData']);
 
+Route::get('/contract/get-signed-pdf-url/{id}', [App\Http\Controllers\ProductController::class, 'getSignedPdfUrl']);
+
 
 Route::get('/generate-pdf-new', [App\Http\Controllers\ProductController::class, 'generateHtmlToPDF']); 
 
 Route::post('/delete-pdf', [App\Http\Controllers\ProductController::class, 'deletePdf']);
 
 Route::post('/get-pdf-sales', [App\Http\Controllers\ProductController::class, 'generatePdfforSales']);
-
- // for Docu Sign test
-// Route::post('/send-document-for-signature', [App\Http\Controllers\ProductController::class, 'DocuSignsendDocumentForSignature'])
 
 // for Hello Sign route 
 
@@ -81,10 +71,7 @@ Route::post('/hellosign-webhook', [App\Http\Controllers\HelloSignWebhookControll
 
 Route::get('/check-document-status/{envelopeId}', [App\Http\Controllers\SignatureController::class, 'checkDocumentStatus']);
 
- 
-
 Route::post('/check-signature-status', [ App\Http\Controllers\SignatureController::class, 'checkSignatureStatus']);
-
 
 Route::get('docusign',[App\Http\Controllers\DocusignController::class, 'index'])->name('docusign');
 Route::get('connect-docusign',[App\Http\Controllers\DocusignController::class, 'connectDocusign'])->name('connect.docusign');
@@ -93,13 +80,15 @@ Route::get('sign-document',[App\Http\Controllers\DocusignController::class,'sign
 
 Route::get('/get-priceLists-payment', [App\Http\Controllers\ProductController::class, 'getPriceListsPayment']);
 
-
-
 Route::get('/get-editor-content', [App\Http\Controllers\ProductController::class, 'geteditorcontent']);
 
 Route::get('/get-all-variables', [App\Http\Controllers\ProductController::class, 'getallvariables']);
 
 Route::get('/get-all-edited-variables', [App\Http\Controllers\ProductController::class, 'getallEditvariables']);
+
+
+Route::post('/fetch-mandatory-fields', [App\Http\Controllers\ProductController::class, 'fetchMandatoryFields']);
+
 
 
 Route::get('/get-variables-for-Edit', [App\Http\Controllers\ProductController::class, 'getvariablesforEdit']);
@@ -111,9 +100,8 @@ Route::post('/save-edited-variable-data', [App\Http\Controllers\ProductControlle
  
 //testing
 Route::post('/update-variable-data', [App\Http\Controllers\ProductController::class, 'updateVariableData']);
+
 Route::get('/sales-list-draft/{id}', [App\Http\Controllers\ProductController::class, 'show']);
-
-
 
 Route::get('/get-contracts', [App\Http\Controllers\ProductController::class, 'getContracts']);
 
@@ -140,9 +128,6 @@ Route::get('/Sales-Lists', [App\Http\Controllers\SalesDetailsController::class, 
 
 Route::post('/save-product-to-sales', [App\Http\Controllers\SalesDetailsController::class, 'saveProductToSales']);
 
-//Route::get('/save-sales-details/{id}', [App\Http\Controllers\SalesDetailsController::class, 'save']);
-
-// Route for handling the form submission to create or update a sales detail
 Route::post('/save-sales-details/{id?}', [App\Http\Controllers\SalesDetailsController::class, 'save']);
 
 
@@ -153,10 +138,6 @@ Route::delete('/delete-sales/{id}', [App\Http\Controllers\SalesDetailsController
 
 Route::get('/createpricewithupdate', [App\Http\Controllers\PriceListController::class, 'createpricewithupdate'])->name('createpricewithupdate');
 
-
-// route for PriceList 
-// web.php
- 
 Route::post('/getMandatoryFieldValues', [App\Http\Controllers\EditContractListController::class, 'getMandatoryFieldValues']);
  
 Route::post('/delete-selected-product', [App\Http\Controllers\EditContractListController::class, 'deleteSelectedProduct']);
@@ -196,7 +177,6 @@ Route::post('/delete-contract-variable', [App\Http\Controllers\EditContractListC
 
 //use App\Http\Controllers\HeaderAndFooterController;
 
-//Route::resource('header-and-footer', HeaderAndFooterController::class);
 Route::post('/header-and-footer/save', [App\Http\Controllers\HeaderAndFooterController::class, 'save'])->name('header-and-footer.save');
 
 Route::post('/header-and-footer/{id}', [App\Http\Controllers\HeaderAndFooterController::class, 'deleteContract'])->name('entry.delete');
@@ -211,9 +191,6 @@ Route::post('/generate-pdf', [App\Http\Controllers\createContractController::cla
 
 // for delete contract list 
  Route::delete('contracts/{id}', [ App\Http\Controllers\ContractController::class, 'destroy'])->name('contracts.destroy');
-
-//for delete variable list 
-//Route::delete('variables/{id}', [App\Http\Controllers\VariableListController::class, 'destroy'])->name('variables.destroy');
  
 // for the edit-contract-page
 Route::get('/edit-contract-list/{id}', [App\Http\Controllers\EditContractListController::class, 'edit']);
@@ -254,12 +231,7 @@ Route::get('/createcontract', [App\Http\Controllers\createContractController::cl
 Route::get('/createvariablecontract', [App\Http\Controllers\ContractController::class, 'show']);
 
 Route::get('/products', [App\Http\Controllers\createContractController::class, 'productforcreatepage'])->name('createcontract.productforcreatepage');
-
-// web.php
-//Route::get('/createcontract', function () { return view('createcontract');})->name('createcontract');
-//Route::match(['get', 'post'], '/createcontract', [App\Http\Controllers\ContractController::class, 'create'])->name('createcontract');
-
-//Route::get('/createcontract', [App\Http\Controllers\createcontractController::class, 'index'])->name('createcontract.index');
+ 
  
 Route::post('/createcontract', [App\Http\Controllers\CreateContractController::class, 'store'])->name('createcontract.store');
 
@@ -269,28 +241,22 @@ Route::post('/savecontract', [App\Http\Controllers\ContractController::class, 's
 //for image 
 Route::post('/upload', [App\Http\Controllers\ContractController::class, 'upload'])->name('ckeditor.upload');
 
-// edit purposes 
-// View Contract History
+ 
 Route::get('/contracts/{id}/history', [App\Http\Controllers\ContractController::class, 'history'])->name('contracts.history');
 
-// Delete Contract
-//Route::delete('/contracts/{id}', [App\Http\Controllers\ContractController::class, 'destroy'])->name('contracts.destroy');
+ 
 
 Route::post('/save', [App\Http\Controllers\createcontractController::class, 'save']);
 
 Route::post('/updatecontract', [App\Http\Controllers\ContractController::class, 'updatecontract']);
  
 Route::get('list',[App\Http\Controllers\MemberController::class,'show']);
-
-//Route::get('/projects', [App\Http\Controllers\ProjectController::class, 'showProjects'])->name('projects.index');
-
-// for edit
+ 
 
 Route::post('/update-project/{id}', [App\Http\Controllers\ProjectController::class, 'updateProject']);
 
 // for delete
 Route::get('/delete/{id}', 'App\Http\Controllers\ProjectController@deleteProject');
-//Route::get('delete/(id)',ProjectController@deleteProject');
-// to make work
+ 
 Route::get('{any}', [App\Http\Controllers\HomeController::class, 'index'])->name('index');
  

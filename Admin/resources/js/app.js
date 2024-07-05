@@ -49,6 +49,7 @@ File: Main Js File
             });
         });
     }
+    
 
     function initMetisMenu() {
         //metis menu

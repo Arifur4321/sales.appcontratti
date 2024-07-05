@@ -21,6 +21,8 @@
     <!-- SweetAlert2 -->
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     
     <div class="row">
         <div class="col-sm">
@@ -38,17 +40,18 @@
             </div>
         </div>
     </div>
-
-    <!-- <div class="table-responsive" style="margin-top:10px;">
+<!--
+    <div class="table-responsive" style="margin-top:10px;">
         <table id="ContractList" class="table">
             <thead>
                 <tr>
                     <th style="text-align: left;">ID</th>
+                    
                 
-                    <th style="text-align: left;">Seller Name</th>
-                    <th style="text-align: left;">Selected PDF Name</th>
-                    <th style="text-align: left;">Product Name</th>
-                    <th style="text-align: left;">Contract Name</th>
+                    <th style="text-align: left;">Sales</th>
+                    <th style="text-align: left;">PDF Name</th>
+                 
+                    <th style="text-align: left;">ContractName</th>
                     <th style="text-align: left;">Recipient email</th>
                     <th style="text-align: left;" >Status</th>
                     <th style="text-align: left;">Action</th>
@@ -62,7 +65,7 @@
                         <td style="text-align: left;">{{ Auth::user()->name }}</td>
                         <td style="text-align: left;">{{ $item->selected_pdf_name }}</td>
                         <td style="text-align: left;">{{ $item->contract_name }}</td>
-                        <td style="text-align: left;">{{ $item->product_name }}</td>
+                     
                         <td style="text-align: left;">{{ $item->recipient_email}}</td>
 
                         <td style="text-align: left;" class="
@@ -92,21 +95,21 @@
                 @endforeach
             </tbody>
         </table>
-    </div> -->
-
+    </div>
+    -->
     
     <div class="table-responsive" style="margin-top:10px;">
     <table id="ContractList" class="table">
         <thead>
             <tr>
                 <th style="text-align: left;">ID</th>
-                <th style="text-align: left;">Seles</th>
+                <th style="text-align: left;">Sales</th>
                 <th style="text-align: left;">PDF Name</th>
               
                 <th style="text-align: left;">Contract Name</th>
                 <th style="text-align: left;">Recipient email</th>
                 <th style="text-align: left;">Status</th>
-                <th style="text-align: left;">Action</th>
+                <th style="text-align: left; width : 18%; ">Action</th>
             </tr>
         </thead>
         <tbody>
@@ -135,7 +138,7 @@
                     <td style="text-align: left;">
                         <div class="btn-toolbar">
                             @if($item->status == 'signed')
-                                <a href="https://app.hellosign.com/editor/view/super_group_guid/{{ $item->envelope_id }}" target="_blank" class="btn btn-success">PDF</a>
+                            <button onclick="openSignedPDF('{{ $item->id }}')" class="btn btn-success">PDF</button>
                             @else
                                 <button class="btn btn-primary" onclick="EditSalesContract('{{ $item->id }}')">Edit</button>
                             @endif
@@ -150,7 +153,25 @@
     </table>
 </div>
 
-    
+<script>
+    function openSignedPDF(id) {
+        $.ajax({
+            url: '/contract/get-signed-pdf-url/' + id,
+            method: 'GET',
+            success: function(response) {
+                if (response.success) {
+                    window.open(response.file_url, '_blank');
+                } else {
+                    alert(response.message);
+                }
+            },
+            error: function() {
+                alert('Error occurred while trying to retrieve the signed PDF URL.');
+            }
+        });
+    }
+</script>
+
 
     <style>
         
@@ -344,8 +365,7 @@
     </script>
 
  
- 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
 
   
     <meta charset="UTF-8">

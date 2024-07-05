@@ -56,7 +56,7 @@
                                     <th scope="col">Email</th>
                                     <th scope="col">Tags</th>
                                     <th scope="col">Projects</th>
-                                    <th scope="col" style="width: 200px;">Action</th>
+                                    <th scope="col" style="width: 18%;">Action</th>
                                 </tr>
                             </thead>
                         </table>

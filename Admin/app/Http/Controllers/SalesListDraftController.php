@@ -41,22 +41,10 @@ class SalesListDraftController extends Controller
         return response()->json(['message' => 'Variable JSON data updated successfully']);
     }
 
-    // public function getVariableJson(Request $request)
-    // {
-    //     // Get the ID from the request
-    //     $id = $request->input('id');
-    
-    //     // Query the sales_list_draft table based on the ID
-    //     $variableJsonData = SalesListDraft::find($id);
-    
-    //     if (!$variableJsonData) {
-    //         return response()->json(['error' => 'Record not found'], 404);
-    //     }
-    
-    //     return response()->json(['variable_json' => $variableJsonData->variable_json]);
-    // }
+ 
 
     public function getVariableJson(Request $request)
+
     {
         // Get the ID from the request
         $id = $request->input('id');
@@ -75,9 +63,6 @@ class SalesListDraftController extends Controller
         ]);
     }
 
-    
-
-
     // for delete row in sales draft list table
     public function destroy($id)
     {
@@ -94,6 +79,7 @@ class SalesListDraftController extends Controller
     }
 
     public function edit($id)
+
     {
         // Logic to retrieve and display data for editing
         $salesListDraft = SalesListDraft::find($id);
@@ -103,21 +89,29 @@ class SalesListDraftController extends Controller
     }
 
     
-    // For table list based on the seller info 
+ 
+
     public function showAll()
+    
     {
         $sellerName = Auth::user()->name;
 
         $salesDetail = SalesDetails::where('name', $sellerName)->first();
-        if(!$salesDetail) {
+        if (!$salesDetail) {
             return response()->json(['status' => 'error', 'message' => 'Sales details not found']);
         }
+
         $salesId = $salesDetail->id;
+        $salesName = $salesDetail->name;
 
-        // Query SalesListDraft table based on $salesId
-        $salesListDraft = SalesListDraft::where('sales_id', $salesId)->get();
+        if ($sellerName == $salesName) {
+            // Query SalesListDraft table based on $salesId
+            $salesListDraft = SalesListDraft::where('sales_id', $salesId)->get();
 
-        return view('Your-Lists', compact('salesListDraft'));
+            return view('Your-Lists', compact('salesListDraft'));
+        }
+
+        return response()->json(['status' => 'error', 'message' => 'Unauthorized access']);
     }
 
      
