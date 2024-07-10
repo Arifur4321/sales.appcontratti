@@ -72,8 +72,135 @@ use Dropbox\Sign\ApiException;
 
 use Dropbox\Sign\Configuration;
 
+use DB;
+
 class ProductController extends Controller
 {
+
+
+
+    public function getAllEditVariables(Request $request)
+    {
+        // Retrieve the 'id' from the request
+        $id = $request->input('id');
+
+        // Find the draft entry in the database using the model
+        $draft = SalesListDraft::find($id);
+
+        if (!$draft) {
+            // If no draft is found, return an error message
+            return response()->json(['success' => false, 'message' => 'Draft not found'], 404);
+        }
+
+        // Get the contract ID from the found draft
+        $contractID = $draft->contract_id;  
+
+        // Retrieve all related variable data along with order from contractvariablecheckbox table
+        $variableData = ContractVariableCheckbox::where('ContractID', $contractID)
+            ->join('variable_lists', 'contractvariablecheckbox.VariableID', '=', 'variable_lists.VariableID')
+            ->select('variable_lists.*', 'contractvariablecheckbox.Order')
+            ->orderByRaw('contractvariablecheckbox.Order IS NULL, contractvariablecheckbox.Order')
+            ->get();
+
+        // Return the variable data along with the contract ID
+        return response()->json([
+            'success' => true,
+            'contractID' => $contractID,
+            'variableData' => $variableData
+        ]);
+    }
+ 
+    public function getallvariables(Request $request)
+    {
+        $contractID = $request->input('selectedContractId');
+        $id = $request->input('id');
+
+        $contract = Contract::find($contractID);
+        $contractName = $contract->contract_name;
+
+        if ($id) {
+            $existingContract = SalesListDraft::find($id);
+
+            if ($existingContract) {
+                $existingContract->update([
+                    'contract_id' => $contractID,
+                    'contract_name' => $contractName
+                ]);
+            } else {
+                return response()->json(['status' => 'error', 'message' => 'Contract not found']);
+            }
+        } else {
+            $lastRow = SalesListDraft::latest()->first();
+            $lastRow->update([
+                'contract_id' => $contractID,
+                'contract_name' => $contractName
+            ]);
+        }
+
+        $variableData = DB::table('variable_lists')
+            ->join('contractvariablecheckbox', 'variable_lists.VariableID', '=', 'contractvariablecheckbox.VariableID')
+            ->where('contractvariablecheckbox.ContractID', $contractID)
+            ->orderByRaw('CASE WHEN `contractvariablecheckbox`.`Order` IS NULL THEN 1 ELSE 0 END, `contractvariablecheckbox`.`Order` ASC')
+            ->select('variable_lists.*', 'contractvariablecheckbox.Order')
+            ->get();
+
+        return response()->json(['variableData' => $variableData]);
+    }
+     
+    // public function getallvariables(Request $request)
+    //     {
+    //         $contractID = $request->input('selectedContractId');
+    //         $id = $request->input('id');
+
+    //          // update contractID and contractName  into table sales_list_draft last  row id as contract_id and contract_name
+    //           // Query the contracts table to get the contract name
+    //             $contract = Contract::find($contractID);
+           
+            
+    //             $contractName = $contract->contract_name;
+
+
+    //             $id = $request->input('id');
+            
+    //             if ($id) {
+    //                 // If ID is provided, try to find the contract by ID
+    //                 $existingContract = SalesListDraft::find($id);
+        
+    //                 if ($existingContract) {
+    //                     // If contract exists, update its details
+    //                     $existingContract->update([
+    //                         'contract_id' => $contractID,
+    //                         'contract_name' => $contractName
+    //                     ]);
+    //                 } else {
+    //                     // If contract with provided ID not found, return an error response
+    //                     return response()->json(['status' => 'error', 'message' => 'Contract not found']);
+    //                 }
+    //             } else {
+    //                 $lastRow = SalesListDraft::latest()->first();
+    //                 // If ID is not provided, create a new contract entry
+    //                 $lastRow->update([
+    //                     'contract_id' => $contractID,
+    //                     'contract_name' => $contractName
+    //                 ]);
+    //             }
+
+    //         // Retrieve distinct variable IDs associated with the given contract ID
+    //         $variableIDs = contractVariableCheckbox::where('ContractID', $contractID)
+    //                         ->distinct('VariableID')
+    //                         ->pluck('VariableID')
+    //                         ->toArray();
+
+    //         // Query the VariableList table to get all related row values based on the variable IDs
+    //         $variableData = VariableList::whereIn('VariableID', $variableIDs)->get();
+
+    //         // Return the variable data
+    //         return response()->json(['variableData' => $variableData]);
+    //     }
+
+
+        
+
 
     protected $signatureRequestApi;
 
@@ -247,32 +374,7 @@ class ProductController extends Controller
             $htmlContent = str_replace($placeholder, $value, $htmlContent);
         }
     }
-
-      /*
-    
-    
-    $variableValues = $request->input('variableValues', []);
  
-    foreach ($variableValues as $name => $variable) {
-        $placeholder = '%' . $name . '%';
-        $value = htmlspecialchars($variable['value'] ?? '');
-
- 
-        if (isset($variable['type']) && $variable['type'] === 'Multiple Box') {
-            $valueArray = explode(',', $value);
-            $formattedValue = '<ul>';
-            foreach ($valueArray as $item) {
-                $formattedValue .= '<li>' . htmlspecialchars($item) . '</li>';
-            }
-            $formattedValue .= '</ul>';
-            $htmlContent = str_replace($placeholder, $formattedValue, $htmlContent);
-        } else {
-            $htmlContent = str_replace($placeholder, $value, $htmlContent);
-        }
-    }
-   */
-
-    /************************************ */
 
     // Replace $PRICE$ placeholder with price details
     $priceValues = $request->input('priceValues', []);
@@ -290,8 +392,13 @@ class ProductController extends Controller
         $frequency = htmlspecialchars($priceValues['frequency']);
         $payments = $priceValues['payments'];
 
-        $amountValues = $priceValues['amountValues'];
-        $dueDateValues = $priceValues['dueDateValues'];
+      // $amountValues = $priceValues['amountValues'];
+      //  $dueDateValues = $priceValues['dueDateValues'];
+      
+      $amountValues = $priceValues['amountValues'] ?? [];
+      $dueDateValues = $priceValues['dueDateValues'] ?? [];
+
+
 
         // Convert includeonprice to boolean
         $includeonprice = filter_var($priceValues['includeonprice'], FILTER_VALIDATE_BOOLEAN);
@@ -1557,96 +1664,47 @@ private function convertImagePaths($htmlContent)
     
 
 
-  
-    public function getallvariables(Request $request)
-        {
-            $contractID = $request->input('selectedContractId');
-            $id = $request->input('id');
-
-             // update contractID and contractName  into table sales_list_draft last  row id as contract_id and contract_name
-              // Query the contracts table to get the contract name
-                $contract = Contract::find($contractID);
-           
-            
-                $contractName = $contract->contract_name;
-
-
-                $id = $request->input('id');
-            
-                if ($id) {
-                    // If ID is provided, try to find the contract by ID
-                    $existingContract = SalesListDraft::find($id);
-        
-                    if ($existingContract) {
-                        // If contract exists, update its details
-                        $existingContract->update([
-                            'contract_id' => $contractID,
-                            'contract_name' => $contractName
-                        ]);
-                    } else {
-                        // If contract with provided ID not found, return an error response
-                        return response()->json(['status' => 'error', 'message' => 'Contract not found']);
-                    }
-                } else {
-                    $lastRow = SalesListDraft::latest()->first();
-                    // If ID is not provided, create a new contract entry
-                    $lastRow->update([
-                        'contract_id' => $contractID,
-                        'contract_name' => $contractName
-                    ]);
-                }
-
-            // Retrieve distinct variable IDs associated with the given contract ID
-            $variableIDs = contractVariableCheckbox::where('ContractID', $contractID)
-                            ->distinct('VariableID')
-                            ->pluck('VariableID')
-                            ->toArray();
-
-            // Query the VariableList table to get all related row values based on the variable IDs
-            $variableData = VariableList::whereIn('VariableID', $variableIDs)->get();
-
-            // Return the variable data
-            return response()->json(['variableData' => $variableData]);
-        }
-
-
-        
+ 
 
 
           
-        public function getAllEditVariables(Request $request)
-        {
-            // Retrieve the 'id' from the request
-            $id = $request->input('id');
+        // public function getAllEditVariables(Request $request)
+
+        // {
+        //     // Retrieve the 'id' from the request
+        //     $id = $request->input('id');
              
-            // Find the draft entry in the database using the model
-            $draft = SalesListDraft::find($id);
+        //     // Find the draft entry in the database using the model
+        //     $draft = SalesListDraft::find($id);
         
-            if (!$draft) {
-                // If no draft is found, return an error message
-                return response()->json(['success' => false, 'message' => 'Draft not found'], 404);
-            }
+        //     if (!$draft) {
+        //         // If no draft is found, return an error message
+        //         return response()->json(['success' => false, 'message' => 'Draft not found'], 404);
+        //     }
         
-            // Get the contract ID from the found draft
-            $contractID = $draft->contract_id;
+        //     // Get the contract ID from the found draft
+        //     $contractID = $draft->contract_id;
             
-            // Retrieve distinct variable IDs associated with the given contract ID from another table
-            $variableIDs = ContractVariableCheckbox::where('ContractID', $contractID)
-                                ->distinct('VariableID')
-                                ->pluck('VariableID')
-                                ->toArray();
+        //     // Retrieve distinct variable IDs associated with the given contract ID from another table
+        //     $variableIDs = ContractVariableCheckbox::where('ContractID', $contractID)
+        //                         ->distinct('VariableID')
+        //                         ->pluck('VariableID')
+        //                         ->toArray();
         
-            // Query the VariableList table to get all related row values based on the variable IDs
-            $variableData = VariableList::whereIn('VariableID', $variableIDs)->get();
+        //     // Query the VariableList table to get all related row values based on the variable IDs
+        //     $variableData = VariableList::whereIn('VariableID', $variableIDs)->get();
         
-            // Return the variable data along with the contract ID
-            return response()->json([
-                'success' => true,
-                'contractID' => $contractID,
-                'variableData' => $variableData
-            ]);
-        }
+        //     // Return the variable data along with the contract ID
+        //     return response()->json([
+        //         'success' => true,
+        //         'contractID' => $contractID,
+        //         'variableData' => $variableData
+        //     ]);
+        // }
         
+
+
+
 
 
 //  public function getallvariables(Request $request)

@@ -44,7 +44,6 @@ class SalesListDraftController extends Controller
  
 
     public function getVariableJson(Request $request)
-
     {
         // Get the ID from the request
         $id = $request->input('id');
@@ -79,7 +78,6 @@ class SalesListDraftController extends Controller
     }
 
     public function edit($id)
-
     {
         // Logic to retrieve and display data for editing
         $salesListDraft = SalesListDraft::find($id);
@@ -92,7 +90,6 @@ class SalesListDraftController extends Controller
  
 
     public function showAll()
-    
     {
         $sellerName = Auth::user()->name;
 

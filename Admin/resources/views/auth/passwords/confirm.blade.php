@@ -34,7 +34,7 @@
 
                                                     <h4 class="mb-3"><i
                                                             class="bx bxs-quote-alt-left text-primary h1 align-middle me-3"></i><span
-                                                            class="text-primary">5k</span>+ Satisfied clients</h4>
+                                                            class="text-primary">5k</span>+ Codice 1% clients</h4>
 
                                                     <div dir="ltr">
                                                         <div class="owl-carousel owl-theme auth-review-carousel"
@@ -50,7 +50,7 @@
 
                                                                     <div>
                                                                         <h4 class="font-size-16 text-primary">Abs1981</h4>
-                                                                        <p class="font-size-14 mb-0">- Skote User</p>
+                                                                        <p class="font-size-14 mb-0">- Codice 1% User</p>
                                                                     </div>
                                                                 </div>
 
@@ -65,7 +65,7 @@
 
                                                                     <div>
                                                                         <h4 class="font-size-16 text-primary">nezerious</h4>
-                                                                        <p class="font-size-14 mb-0">- Skote User</p>
+                                                                        <p class="font-size-14 mb-0">- Codice 1% User</p>
                                                                     </div>
                                                                 </div>
 

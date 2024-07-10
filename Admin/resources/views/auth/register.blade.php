@@ -51,7 +51,7 @@
 
                                                                     <div>
                                                                         <h4 class="font-size-16 text-primary">Abs1981</h4>
-                                                                        <p class="font-size-14 mb-0">- Skote User</p>
+                                                                        <p class="font-size-14 mb-0">- Codice 1 User</p>
                                                                     </div>
                                                                 </div>
 

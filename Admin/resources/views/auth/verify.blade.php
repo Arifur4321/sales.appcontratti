@@ -33,23 +33,23 @@
 
                                                     <h4 class="mb-3"><i
                                                             class="bx bxs-quote-alt-left text-primary h1 align-middle me-3"></i><span
-                                                            class="text-primary">5k</span>+ Satisfied clients</h4>
+                                                            class="text-primary">5k</span>+ Codice 1% clients</h4>
 
                                                     <div dir="ltr">
                                                         <div class="owl-carousel owl-theme auth-review-carousel"
                                                             id="auth-review-carousel">
                                                             <div class="item">
                                                                 <div class="py-3">
-                                                                    <p class="font-size-16 mb-4">" Fantastic theme with a
+                                                                  <!--  <p class="font-size-16 mb-4">" Fantastic theme with a
                                                                         ton of options. If you just want the HTML to
                                                                         integrate with your project, then this is the
                                                                         package. You can find the files in the 'dist'
                                                                         folder...no need to install git and all the other
-                                                                        stuff the documentation talks about. "</p>
+                                                                        stuff the documentation talks about. "</p>  -->
 
                                                                     <div>
-                                                                        <h4 class="font-size-16 text-primary">Abs1981</h4>
-                                                                        <p class="font-size-14 mb-0">- Skote User</p>
+                                                                        <h4 class="font-size-16 text-primary"> </h4>
+                                                                        <p class="font-size-14 mb-0">- Codice 1% User</p>
                                                                     </div>
                                                                 </div>
 
@@ -57,14 +57,14 @@
 
                                                             <div class="item">
                                                                 <div class="py-3">
-                                                                    <p class="font-size-16 mb-4">" If Every Vendor on Envato
+                                                               <!--     <p class="font-size-16 mb-4">" If Every Vendor on Envato
                                                                         are as supportive as Themesbrand, Development with
                                                                         be a nice experience. You guys are Wonderful. Keep
-                                                                        us the good work. "</p>
+                                                                        us the good work. "</p>   -->
 
                                                                     <div>
-                                                                        <h4 class="font-size-16 text-primary">nezerious</h4>
-                                                                        <p class="font-size-14 mb-0">- Skote User</p>
+                                                                        <h4 class="font-size-16 text-primary"> </h4>
+                                                                        <p class="font-size-14 mb-0">- Codice 1% User</p>
                                                                     </div>
                                                                 </div>
 
@@ -133,9 +133,9 @@
                                         <p class="mb-0">©
                                             <script>
                                                 document.write(new Date().getFullYear())
-                                            </script> Skote. Crafted with <i
+                                            </script>   Crafted with <i
                                                 class="mdi mdi-heart text-danger"></i> by
-                                            Themesbrand
+                                            Codice 1%
                                         </p>
                                     </div>
                                 </div>
