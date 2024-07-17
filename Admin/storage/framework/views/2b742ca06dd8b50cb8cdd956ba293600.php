@@ -1,20 +1,20 @@
-@extends('layouts.master')
-@section('title')
-@lang('translation.Sales List')
-@endsection
 
-@section('content')
-    @component('components.breadcrumb')
-        @slot('li_1')
+<?php $__env->startSection('title'); ?>
+<?php echo app('translator')->get('translation.Sales List'); ?>
+<?php $__env->stopSection(); ?>
+
+<?php $__env->startSection('content'); ?>
+    <?php $__env->startComponent('components.breadcrumb'); ?>
+        <?php $__env->slot('li_1'); ?>
             Projects
-        @endslot
-        @slot('title')
-        @lang('translation.Sales List')
+        <?php $__env->endSlot(); ?>
+        <?php $__env->slot('title'); ?>
+        <?php echo app('translator')->get('translation.Sales List'); ?>
         
-        @endslot
-    @endcomponent
+        <?php $__env->endSlot(); ?>
+    <?php echo $__env->renderComponent(); ?>
 
-<meta name="csrf-token" content="{{ csrf_token() }}">
+<meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script> 
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-switch/3.3.4/css/bootstrap3/bootstrap-switch.min.css">
@@ -38,12 +38,12 @@
 
 <div class="row">
     <div class="col-7">
-    @if (Auth::check())
-        <h6>@lang('translation.Seller Name') : {{ Auth::user()->name }}</h6> <br>
-    @endif
+    <?php if(Auth::check()): ?>
+        <h6><?php echo app('translator')->get('translation.Seller Name'); ?> : <?php echo e(Auth::user()->name); ?></h6> <br>
+    <?php endif; ?>
         <div class="mb-3">
             <div class="input-group">
-                <label class="input-group-text" for="Product">@lang('translation.Product') :</label>
+                <label class="input-group-text" for="Product"><?php echo app('translator')->get('translation.Product'); ?> :</label>
                 <select class="form-select" id="frequency" name="frequency">
                     <option value="" selected>Select Product</option>
                 </select>
@@ -56,7 +56,7 @@
     <div class="col-7">
         <div class="mb-3">
             <div class="input-group">
-                <label class="input-group-text" for="Contract"> @lang('translation.Contract') :</label>
+                <label class="input-group-text" for="Contract"> <?php echo app('translator')->get('translation.Contract'); ?> :</label>
                 <select class="form-select" id="Contract" name="Contract">
                     <option value="" selected>Select Contract</option>
                 </select>
@@ -73,8 +73,8 @@
             <table id="sales-variable" class="table">
                 <thead>
                     <tr>
-                        <th style="width:50%"> @lang('translation.Variable Name') </th>
-                        <th style="width:60%"> @lang('translation.Variable Label Value') </th>
+                        <th style="width:50%"> <?php echo app('translator')->get('translation.Variable Name'); ?> </th>
+                        <th style="width:60%"> <?php echo app('translator')->get('translation.Variable Label Value'); ?> </th>
                     </tr>
                 </thead>
                 <tbody>
@@ -93,8 +93,8 @@
         <div class="row mt-3">
             <div class="col-6"></div>
             <div class="col-6 text-right">
-                <button type="button" class="btn btn-primary" id="updateButton">@lang('translation.Update')</button>
-                <button type="button" class="btn btn-primary ml-2" id="mytestButton">@lang('translation.Preview&Send') </button>
+                <button type="button" class="btn btn-primary" id="updateButton"><?php echo app('translator')->get('translation.Update'); ?></button>
+                <button type="button" class="btn btn-primary ml-2" id="mytestButton"><?php echo app('translator')->get('translation.Preview&Send'); ?> </button>
             </div>
         </div>
     </div>
@@ -137,8 +137,8 @@
                 <!-- PDF content will be injected here -->
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" id="closeModalBtn" data-bs-dismiss="modal"> @lang('translation.Close')     </button>
-                <button type="button" class="btn btn-primary" id="sendButton" data-bs-dismiss="modal" disabled> @lang('translation.Send')   </button>
+                <button type="button" class="btn btn-secondary" id="closeModalBtn" data-bs-dismiss="modal"> <?php echo app('translator')->get('translation.Close'); ?>     </button>
+                <button type="button" class="btn btn-primary" id="sendButton" data-bs-dismiss="modal" disabled> <?php echo app('translator')->get('translation.Send'); ?>   </button>
             </div>
         </div>
     </div>
@@ -684,7 +684,7 @@ case 'Multiple Box':
             url: '/get-products',
             type: 'GET',
             data: {
-                seller_name: "{{ Auth::user()->name }}"
+                seller_name: "<?php echo e(Auth::user()->name); ?>"
             },
             success: function(response) {
                 if(response.status === 'success') {
@@ -1324,4 +1324,6 @@ case 'Multiple Box':
 
     });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.master', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH F:\Giacometti\Skote_Html_Laravel_v4.2.1\Laravel\Server-Backup\New-Branch-Work-6-10-2024\working-one\sales-appcontratti\resources\views/Send-New-Contracts.blade.php ENDPATH**/ ?>

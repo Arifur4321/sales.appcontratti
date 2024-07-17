@@ -313,7 +313,7 @@ class ProductController extends Controller
 
 
 
- public function generatePdfforSales(Request $request)
+  public function generatePdfforSales(Request $request)
 {
     // Validate the request input
     $request->validate([
@@ -339,43 +339,80 @@ class ProductController extends Controller
     $contractID = is_numeric($contractIdentifier) ? $contractIdentifier : $contract->id;
     $htmlContent = $contract->editor_content;
 
-  
-
     $variableValues = $request->input('variableValues', []);
 
     // Replace placeholders with actual values from variableValues
-    foreach ($variableValues as $name => $variable) {
-         $placeholder = '%' . $name . '%';
-       
-       $value = htmlspecialchars($variable['value'] ?? '');
+ foreach ($variableValues as $name => $variable) {
+    $placeholder = '%' . $name . '%';
 
-        // Handle Multiple Box type
-        if (isset($variable['type'])) {
-            if ($variable['type'] === 'Multiple Box') {
-                $valueArray = explode(',', $value);
-                $formattedValue = '<ul>';
-                foreach ($valueArray as $item) {
-                    $formattedValue .= '<li>' . htmlspecialchars($item) . '</li>';
+    // Handle different types
+    if (isset($variable['type'])) {
+        if ($variable['type'] === 'Multiple Box') {
+            // Handle Multiple Box type
+            $formattedValue = '<ul>';
+            if (is_array($variable['value'])) {
+                // New payload format (array of objects)
+                foreach ($variable['value'] as $item) {
+                    if (is_array($item)) {
+                        $inputValue = htmlspecialchars($item['inputValue'] ?? '');
+                        $ckEditorContent = $item['ckEditorContent'] ?? '';
+                    } else {
+                        $inputValue = htmlspecialchars($item);
+                        $ckEditorContent = '';
+                    }
+                    $formattedValue .= '<li>' . $inputValue;
+                    if (!empty($ckEditorContent)) {
+                        $formattedValue .= ' ' . $ckEditorContent;
+                    }
+                    $formattedValue .= '</li>';
                 }
-                $formattedValue .= '</ul>';
-                $htmlContent = str_replace($placeholder, $formattedValue, $htmlContent);
-            } elseif ($variable['type'] === 'Dates') {
-                // Handle Dates type
-
-                $dueDate = DateTime::createFromFormat('Y-m-d', $value);
-                $formattedDate = $dueDate ? $dueDate->format('d/m/Y') : htmlspecialchars($dueDateValues[$i]);
- 
-                $htmlContent = str_replace($placeholder, $formattedDate, $htmlContent);
             } else {
-                // Handle other types
-                $htmlContent = str_replace($placeholder, $value, $htmlContent);
+                // Old payload format (single string with items separated by semicolons and commas)
+                $valueArray = explode(',', $variable['value']);
+                foreach ($valueArray as $item) {
+                    $subItems = explode(';', $item);
+                    foreach ($subItems as $subItem) {
+                        $inputValue = htmlspecialchars(trim($subItem));
+                        $formattedValue .= '<li>' . $inputValue . '</li>';
+                    }
+                }
             }
+            $formattedValue .= '</ul>';
+            $htmlContent = str_replace($placeholder, $formattedValue, $htmlContent);
+        } elseif ($variable['type'] === 'Single Box') {
+            // Handle Single Box type
+            if (is_array($variable['value'])) {
+                $inputValue = htmlspecialchars($variable['value']['inputValue'] ?? '');
+                $ckEditorContent = $variable['value']['ckEditorContent'] ?? '';
+            } else {
+                $inputValue = htmlspecialchars($variable['value']);
+                $ckEditorContent = '';
+            }
+            $formattedValue = $inputValue;
+            if (!empty($ckEditorContent)) {
+                $formattedValue .= ' ' . $ckEditorContent;
+            }
+            $htmlContent = str_replace($placeholder, $formattedValue, $htmlContent);
+        } elseif ($variable['type'] === 'Dates') {
+            // Handle Dates type
+            $dueDate = DateTime::createFromFormat('Y-m-d', $variable['value']);
+            $formattedDate = $dueDate ? $dueDate->format('d/m/Y') : htmlspecialchars($variable['value']);
+            $htmlContent = str_replace($placeholder, $formattedDate, $htmlContent);
         } else {
+            // Handle Single Line Text and other types
+            $value = htmlspecialchars($variable['value'] ?? '');
             $htmlContent = str_replace($placeholder, $value, $htmlContent);
         }
+    } else {
+        $value = htmlspecialchars($variable['value'] ?? '');
+        $htmlContent = str_replace($placeholder, $value, $htmlContent);
     }
- 
+}
 
+
+    
+    
+    
     // Replace $PRICE$ placeholder with price details
     $priceValues = $request->input('priceValues', []);
 
@@ -392,13 +429,8 @@ class ProductController extends Controller
         $frequency = htmlspecialchars($priceValues['frequency']);
         $payments = $priceValues['payments'];
 
-      // $amountValues = $priceValues['amountValues'];
-      //  $dueDateValues = $priceValues['dueDateValues'];
-      
-      $amountValues = $priceValues['amountValues'] ?? [];
-      $dueDateValues = $priceValues['dueDateValues'] ?? [];
-
-
+        $amountValues = $priceValues['amountValues'] ?? [];
+        $dueDateValues = $priceValues['dueDateValues'] ?? [];
 
         // Convert includeonprice to boolean
         $includeonprice = filter_var($priceValues['includeonprice'], FILTER_VALIDATE_BOOLEAN);
@@ -421,13 +453,9 @@ class ProductController extends Controller
         for ($i = 0; $i < $paymentMaxRange; $i++) {
             // Retrieve the corresponding amount and due date from the arrays
             $formattedPaymentAmount = number_format(floatval($amountValues[$i]), 2, ',', '.');
-            
-            
-            //$formattedDueDate = htmlspecialchars($dueDateValues[$i]);
 
             $dueDate = DateTime::createFromFormat('Y-m-d', $dueDateValues[$i]);
             $formattedDueDate = $dueDate ? $dueDate->format('d/m/Y') : htmlspecialchars($dueDateValues[$i]);
-        
 
             $paymentAmount = floatval($amountValues[$i]);
             $totalCheck += $paymentAmount;
@@ -440,7 +468,6 @@ class ProductController extends Controller
         $expectedTotal = $includeonprice ? $priceWithVat : floatval($dynamicminRange);
         
         // Allow a discrepancy of up to 0.80
-
         $acceptableDifference = 0.80;
 
         if (abs($totalCheck - $expectedTotal) > $acceptableDifference) {
@@ -546,8 +573,6 @@ class ProductController extends Controller
             </style>
             <div>' . $htmlContent . '</div>';
 
-  
-
         // Write the HTML content to the PDF
         $mpdf->WriteHTML($contentHTML);
 
@@ -602,10 +627,10 @@ class ProductController extends Controller
 
     } catch (\Mpdf\MpdfException $e) {
         // Handle mPDF exception
-   
         return response()->json(['error' => 'PDF generation failed', 'message' => $e->getMessage()], 500);
     }
 }
+
 
 // *****************for sending pdf to signer email with changing firma qui photo to signer tag 
 public function sendDocumentForSignature(Request $request)

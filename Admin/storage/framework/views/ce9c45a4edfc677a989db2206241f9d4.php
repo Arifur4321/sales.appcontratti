@@ -610,4 +610,4 @@ unset($__errorArgs, $__bag); ?>" id="avatar" name="avatar" autofocus>
     });
 </script>
 
-<?php $__env->stopSection(); ?><?php /**PATH F:\Giacometti\Skote_Html_Laravel_v4.2.1\Laravel\Server-Backup\New-Branch-Work-6-10-2024\working-one\sales-appcontratti\resources\views/layouts/topbar.blade.php ENDPATH**/ ?>
+<?php $__env->stopSection(); ?><?php /**PATH /home/u121027207/domains/appcontratti.it/public_html/sales/resources/views/layouts/topbar.blade.php ENDPATH**/ ?>

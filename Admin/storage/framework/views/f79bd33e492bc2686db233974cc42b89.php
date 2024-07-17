@@ -148,7 +148,10 @@
                             <?php endif; ?>
                             <button type="button" style="margin-left:2px;" onclick="DeleteSalesContract('<?php echo e($item->id); ?>')" class="btn btn-danger waves-effect waves-light">
                                 <i class="bx bx-block font-size-16 align-middle me-2"></i> <?php echo app('translator')->get('translation.Delete'); ?>
-                            </button>
+                            </button>   
+                       
+
+
                         </div>
                     </td>
                 </tr>
@@ -482,4 +485,4 @@
 
 
 
-<?php echo $__env->make('layouts.master', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH F:\Giacometti\Skote_Html_Laravel_v4.2.1\Laravel\Server-Backup\New-Branch-Work-6-10-2024\working-one\sales-appcontratti\resources\views/Your-Lists.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.master', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH /home/u121027207/domains/appcontratti.it/public_html/sales/resources/views/Your-Lists.blade.php ENDPATH**/ ?>

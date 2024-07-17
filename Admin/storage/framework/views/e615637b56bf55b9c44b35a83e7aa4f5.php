@@ -1,21 +1,21 @@
-@extends('layouts.master')
-@section('title')
-@lang('translation.Edit Sales List')
 
-@endsection
+<?php $__env->startSection('title'); ?>
+<?php echo app('translator')->get('translation.Edit Sales List'); ?>
 
-@section('content')
-    @component('components.breadcrumb')
-        @slot('li_1')
+<?php $__env->stopSection(); ?>
+
+<?php $__env->startSection('content'); ?>
+    <?php $__env->startComponent('components.breadcrumb'); ?>
+        <?php $__env->slot('li_1'); ?>
             Projects
-        @endslot
-        @slot('title')
-        @lang('translation.Edit Sales List')
+        <?php $__env->endSlot(); ?>
+        <?php $__env->slot('title'); ?>
+        <?php echo app('translator')->get('translation.Edit Sales List'); ?>
 
-        @endslot
-    @endcomponent
+        <?php $__env->endSlot(); ?>
+    <?php echo $__env->renderComponent(); ?>
  
-<meta name="csrf-token" content="{{ csrf_token() }}">
+<meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script> 
  
 
@@ -38,7 +38,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/14.7.0/nouislider.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js" ></script>
-<script src="{{ asset('js/ckeditor/build/ckeditor.js') }}"></script>
+<script src="<?php echo e(asset('js/ckeditor/build/ckeditor.js')); ?>"></script>
  
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -49,17 +49,17 @@
    
 <div class="row">
     <div class="col-7">
-    @if (Auth::check())
-        <h6> @lang('translation.Seller Name') : {{ Auth::user()->name }}</h6> <br>
-    @endif
+    <?php if(Auth::check()): ?>
+        <h6> <?php echo app('translator')->get('translation.Seller Name'); ?> : <?php echo e(Auth::user()->name); ?></h6> <br>
+    <?php endif; ?>
         <div class="mb-3">
              <div class="input-group">
-                <label class="input-group-text" for="Product">@lang('translation.Product') :</label>
+                <label class="input-group-text" for="Product"><?php echo app('translator')->get('translation.Product'); ?> :</label>
                 <select class="form-select" id="frequency" name="frequency">
                     <option value="" selected>Select Product</option>
-                    @if(!empty($productName))
-                        <option value="{{ $productName }}" selected>{{ $productName }}</option>
-                    @endif
+                    <?php if(!empty($productName)): ?>
+                        <option value="<?php echo e($productName); ?>" selected><?php echo e($productName); ?></option>
+                    <?php endif; ?>
                     <!-- Other options will be dynamically added here -->
                 </select>
              </div>
@@ -72,12 +72,12 @@
     <div class="col-7">
         <div class="mb-3">
             <div class="input-group">
-                <label class="input-group-text" for="Contract">@lang('translation.Contract'):</label>
+                <label class="input-group-text" for="Contract"><?php echo app('translator')->get('translation.Contract'); ?>:</label>
                 <select class="form-select" id="Contract" name="Contract">
                   <option value="" selected>Select Contract</option>
-                  @if(!empty($ContractName))
-                        <option value="{{ $ContractName }}" selected>{{ $ContractName }}</option>
-                    @endif
+                  <?php if(!empty($ContractName)): ?>
+                        <option value="<?php echo e($ContractName); ?>" selected><?php echo e($ContractName); ?></option>
+                    <?php endif; ?>
                   
                 </select>
             </div>
@@ -91,8 +91,8 @@
             <table id="sales-variable" class="table">
                 <thead>
                     <tr>
-                    <th style="width:50%"> @lang('translation.Variable Name') </th>
-                        <th style="width:60%"> @lang('translation.Variable Label Value') </th>
+                    <th style="width:50%"> <?php echo app('translator')->get('translation.Variable Name'); ?> </th>
+                        <th style="width:60%"> <?php echo app('translator')->get('translation.Variable Label Value'); ?> </th>
                     </tr>
                 </thead>
                 <tbody>
@@ -112,8 +112,8 @@
         <div class="row mt-3">
                 <div class="col-6"></div>
                     <div class="col-6 text-right">
-                        <button type="button" class="btn btn-primary" id="updateButton">@lang('translation.Update')</button>
-                        <button type="button" class="btn btn-primary ml-2" id="mytestButton">  @lang('translation.Preview&Send') </button>
+                        <button type="button" class="btn btn-primary" id="updateButton"><?php echo app('translator')->get('translation.Update'); ?></button>
+                        <button type="button" class="btn btn-primary ml-2" id="mytestButton">  <?php echo app('translator')->get('translation.Preview&Send'); ?> </button>
                     </div>
             </div>
         </div>
@@ -159,8 +159,8 @@
                 <!-- PDF content will be injected here -->
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" id="closeModalBtn" data-bs-dismiss="modal">   @lang('translation.Close')   </button>
-                <button type="button" class="btn btn-primary" id="sendButton" data-bs-dismiss="modal" disabled>  @lang('translation.Send')    </button>
+                <button type="button" class="btn btn-secondary" id="closeModalBtn" data-bs-dismiss="modal">   <?php echo app('translator')->get('translation.Close'); ?>   </button>
+                <button type="button" class="btn btn-primary" id="sendButton" data-bs-dismiss="modal" disabled>  <?php echo app('translator')->get('translation.Send'); ?>    </button>
             </div>
         </div>
     </div>
@@ -1405,4 +1405,6 @@
     });
 </script>
 
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.master', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH /home/u121027207/domains/appcontratti.it/public_html/sales/resources/views/Edit-New-Contracts.blade.php ENDPATH**/ ?>

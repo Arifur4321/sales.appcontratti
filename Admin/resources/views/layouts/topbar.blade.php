@@ -190,7 +190,7 @@
         </div>
 
         <div class="dropdown d-inline-block">
-            <!-- <button type="button" class="btn header-item waves-effect"
+              <button type="button" class="btn header-item waves-effect"
                 data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 @switch(Session::get('lang'))
                     @case('ru')
@@ -208,7 +208,7 @@
                     @default
                         <img src="{{ URL::asset('build/images/flags/us.jpg')}}" alt="Header Language" height="16">
                 @endswitch
-            </button> -->
+            </button>  
             <div class="dropdown-menu dropdown-menu-end">
 
                 <!-- item-->
@@ -216,14 +216,14 @@
                     <img src="{{ URL::asset ('build/images/flags/us.jpg') }}" alt="user-image" class="me-1" height="12"> <span class="align-middle">English</span>
                 </a>
                 <!-- item-->
-                <a href="{{ url('index/sp') }}" class="dropdown-item notify-item language" data-lang="sp">
+                <!-- <a href="{{ url('index/sp') }}" class="dropdown-item notify-item language" data-lang="sp">
                     <img src="{{ URL::asset ('build/images/flags/spain.jpg') }}" alt="user-image" class="me-1" height="12"> <span class="align-middle">Spanish</span>
-                </a>
+                </a> -->
 
                 <!-- item-->
-                <a href="{{ url('index/gr') }}" class="dropdown-item notify-item language" data-lang="gr">
+                <!-- <a href="{{ url('index/gr') }}" class="dropdown-item notify-item language" data-lang="gr">
                     <img src="{{ URL::asset ('build/images/flags/germany.jpg') }}" alt="user-image" class="me-1" height="12"> <span class="align-middle">German</span>
-                </a>
+                </a> -->
 
                 <!-- item-->
                 <a href="{{ url('index/it') }}" class="dropdown-item notify-item language" data-lang="it">
@@ -231,9 +231,9 @@
                 </a>
 
                 <!-- item-->
-                <a href="{{ url('index/ru') }}" class="dropdown-item notify-item language" data-lang="ru">
+                <!-- <a href="{{ url('index/ru') }}" class="dropdown-item notify-item language" data-lang="ru">
                     <img src="{{ URL::asset ('build/images/flags/russia.jpg') }}" alt="user-image" class="me-1" height="12"> <span class="align-middle">Russian</span>
-                </a>
+                </a> -->
             </div>
         </div>
 
@@ -397,7 +397,7 @@
                 </a>
                 -->
                 <!-- <a class="dropdown-item" href="#"><i class="bx bx-wallet font-size-16 align-middle me-1"></i> <span key="t-my-wallet">@lang('translation.My_Wallet')</span></a> -->
-                <a class="dropdown-item d-block" href="#" data-bs-toggle="modal" data-bs-target=".change-password"><span class="badge bg-success float-end"></span><i class="bx bx-wrench font-size-16 align-middle me-1"></i> <span key="t-settings"> Update Password</span></a>
+                <a class="dropdown-item d-block" href="#" data-bs-toggle="modal" data-bs-target=".change-password"><span class="badge bg-success float-end"></span><i class="bx bx-wrench font-size-16 align-middle me-1"></i> <span key="t-settings"> @lang('translation.Update Password')  </span></a>
                 
                  <!-- <a class="dropdown-item" href="#"><i class="bx bx-lock-open font-size-16 align-middle me-1"></i> <span key="t-lock-screen">@lang('translation.Lock_screen')</span></a>-->
                 

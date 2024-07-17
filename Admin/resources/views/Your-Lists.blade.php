@@ -9,7 +9,7 @@
             Projects
         @endslot
         @slot('title')
-        Sales List 
+        @lang('translation.Sales List')
         @endslot
     @endcomponent
 
@@ -36,7 +36,7 @@
 
         <div class="col-sm-auto" style="margin-right:8px;">
             <div class="text-sm-end">
-                <button type="button" class="btn btn-primary" onclick="openModalNew()">Add New Sales</button>
+                <button type="button" class="btn btn-primary" onclick="openModalNew()">  @lang('translation.Add New Sales')</button>
             </div>
         </div>
     </div>
@@ -102,14 +102,16 @@
     <table id="ContractList" class="table">
         <thead>
             <tr>
-                <th style="text-align: left;">ID</th>
-                <th style="text-align: left;">Sales</th>
-                <th style="text-align: left;">PDF Name</th>
-              
-                <th style="text-align: left;">Contract Name</th>
-                <th style="text-align: left;">Recipient email</th>
-                <th style="text-align: left;">Status</th>
-                <th style="text-align: left; width : 18%; ">Action</th>
+          
+
+
+                    <th style="text-align: left;">ID</th>
+                    <th style="text-align: left;" class="sales-column">@lang('translation.Sales')</th>
+                    <th style="text-align: left;">@lang('translation.PDF Name')</th>
+                    <th style="text-align: left;">@lang('translation.Contract Name')</th>
+                    <th style="text-align: left;">@lang('translation.Recipient Email')</th>
+                    <th style="text-align: left;">@lang('translation.Status')</th>
+                    <th style="text-align: left; width: 18%;">@lang('translation.Action')</th>
             </tr>
         </thead>
         <tbody>
@@ -140,11 +142,14 @@
                             @if($item->status == 'signed')
                             <button onclick="openSignedPDF('{{ $item->id }}')" class="btn btn-success">PDF</button>
                             @else
-                                <button class="btn btn-primary" onclick="EditSalesContract('{{ $item->id }}')">Edit</button>
+                                <button class="btn btn-primary" onclick="EditSalesContract('{{ $item->id }}')">@lang('translation.Edit')</button>
                             @endif
                             <button type="button" style="margin-left:2px;" onclick="DeleteSalesContract('{{ $item->id }}')" class="btn btn-danger waves-effect waves-light">
-                                <i class="bx bx-block font-size-16 align-middle me-2"></i> Delete
-                            </button>
+                                <i class="bx bx-block font-size-16 align-middle me-2"></i> @lang('translation.Delete')
+                            </button>   
+                       
+
+
                         </div>
                     </td>
                 </tr>
