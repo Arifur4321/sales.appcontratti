@@ -43,6 +43,9 @@ Route::delete('/sales-list-draft/{id}', [App\Http\Controllers\SalesListDraftCont
  
 Route::get('/Edit-New-Contracts/{id}', [App\Http\Controllers\SalesListDraftController::class, 'edit']);
 
+Route::get('/Send-New-Contracts/{id}', [App\Http\Controllers\SalesListDraftController::class, 'showSendNewContractsPage'])->name('send.new.contracts');
+
+
 
 Route::get('/Your-Lists', [App\Http\Controllers\SalesListDraftController::class, 'showAll']);
 
@@ -111,6 +114,13 @@ Route::post('/saleslogin', [App\Http\Controllers\SalesDetailsAuthController::cla
 
 
 Route::get('/insert-mandatory-status', [App\Http\Controllers\EditContractListController::class, 'insertMandatoryStatus']);
+
+
+Route::get('/Send-New-Contracts/{newEntryId}', [App\Http\Controllers\SalesListDraftController::class, 'showSalesList'])->name('sales.list');
+
+
+Route::get('/sales-data', [App\Http\Controllers\SalesListDraftController::class, 'getSalesData'])->name('sales.data');
+
 
 
 Route::get('/check-unique', [App\Http\Controllers\SalesDetailsController::class, 'checkUnique']);

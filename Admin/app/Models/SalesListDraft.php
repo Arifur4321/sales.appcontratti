@@ -34,7 +34,8 @@ class SalesListDraft extends Model
         'status', 
         'envelope_id',
         'recipient_email',
-        'shareable_pdf_link'
+        'shareable_pdf_link',
+        'company_id',
     ];
 
     

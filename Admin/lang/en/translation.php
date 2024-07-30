@@ -89,7 +89,7 @@ return [
 "Variable Label Value" => "Variable Label Value",
 "Preview&Send" => "Preview&Send",
 "Send" => "Send",
-
+"check" => "Check",
 
 
 

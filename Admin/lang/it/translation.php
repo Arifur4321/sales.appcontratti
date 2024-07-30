@@ -104,7 +104,7 @@ return [
   "Variable Label Value" => "Valore Etichetta Variabile",
   "Preview&Send" => "Anteprima&Invia",
   "Send" => "Invia",
-  
+  "check" => "Controllo",
 
 
 

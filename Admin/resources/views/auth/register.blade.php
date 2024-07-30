@@ -99,12 +99,12 @@
                                     <div class="my-auto">
 
                                         <div>
-                                            <h5 class="text-primary">Register account</h5>
-                                            <p class="text-muted">Get your free Skote account now.</p>
+                                            <!-- <h5 class="text-primary">Register account</h5>
+                                            <p class="text-muted">Get your free Skote account now.</p> -->
                                         </div>
 
                                         <div class="mt-4">
-                                            <form method="POST" class="form-horizontal" action="{{ route('register') }}" enctype="multipart/form-data">
+                                            <!-- <form method="POST" class="form-horizontal" action="{{ route('register') }}" enctype="multipart/form-data">
                                                 @csrf
                                                 <div class="mb-3">
                                                     <label for="useremail" class="form-label">Email <span class="text-danger">*</span></label>
@@ -213,7 +213,7 @@
                                                     <p class="mb-0">By registering you agree to the Skote <a href="#"
                                                             class="text-primary">Terms of Use</a></p>
                                                 </div>
-                                            </form>
+                                            </form> -->
 
                                             <div class="mt-3 text-center">
                                                 <p>Already have an account ? <a href="{{ url('login') }}"

@@ -147,57 +147,7 @@ class ProductController extends Controller
         return response()->json(['variableData' => $variableData]);
     }
      
-    // public function getallvariables(Request $request)
-    //     {
-    //         $contractID = $request->input('selectedContractId');
-    //         $id = $request->input('id');
-
-    //          // update contractID and contractName  into table sales_list_draft last  row id as contract_id and contract_name
-    //           // Query the contracts table to get the contract name
-    //             $contract = Contract::find($contractID);
-           
-            
-    //             $contractName = $contract->contract_name;
-
-
-    //             $id = $request->input('id');
-            
-    //             if ($id) {
-    //                 // If ID is provided, try to find the contract by ID
-    //                 $existingContract = SalesListDraft::find($id);
-        
-    //                 if ($existingContract) {
-    //                     // If contract exists, update its details
-    //                     $existingContract->update([
-    //                         'contract_id' => $contractID,
-    //                         'contract_name' => $contractName
-    //                     ]);
-    //                 } else {
-    //                     // If contract with provided ID not found, return an error response
-    //                     return response()->json(['status' => 'error', 'message' => 'Contract not found']);
-    //                 }
-    //             } else {
-    //                 $lastRow = SalesListDraft::latest()->first();
-    //                 // If ID is not provided, create a new contract entry
-    //                 $lastRow->update([
-    //                     'contract_id' => $contractID,
-    //                     'contract_name' => $contractName
-    //                 ]);
-    //             }
-
-    //         // Retrieve distinct variable IDs associated with the given contract ID
-    //         $variableIDs = contractVariableCheckbox::where('ContractID', $contractID)
-    //                         ->distinct('VariableID')
-    //                         ->pluck('VariableID')
-    //                         ->toArray();
-
-    //         // Query the VariableList table to get all related row values based on the variable IDs
-    //         $variableData = VariableList::whereIn('VariableID', $variableIDs)->get();
-
-    //         // Return the variable data
-    //         return response()->json(['variableData' => $variableData]);
-    //     }
-
+   
 
         
 
@@ -633,6 +583,7 @@ class ProductController extends Controller
 
 
 // *****************for sending pdf to signer email with changing firma qui photo to signer tag 
+
 public function sendDocumentForSignature(Request $request)
 {
     $pdfUrl = $request->input('pdfUrl');
@@ -858,6 +809,7 @@ public function sendDocumentForSignature(Request $request)
         return $content;
     }
  
+  
     // For whats app message method 
 
     private function sendWhatsAppMessage($recipientMobile, $signatureUrl)

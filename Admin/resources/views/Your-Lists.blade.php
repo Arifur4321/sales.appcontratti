@@ -40,63 +40,7 @@
             </div>
         </div>
     </div>
-<!--
-    <div class="table-responsive" style="margin-top:10px;">
-        <table id="ContractList" class="table">
-            <thead>
-                <tr>
-                    <th style="text-align: left;">ID</th>
-                    
-                
-                    <th style="text-align: left;">Sales</th>
-                    <th style="text-align: left;">PDF Name</th>
-                 
-                    <th style="text-align: left;">ContractName</th>
-                    <th style="text-align: left;">Recipient email</th>
-                    <th style="text-align: left;" >Status</th>
-                    <th style="text-align: left;">Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($salesListDraft as $item)
-                    <tr>
-                        <td style="text-align: left;">{{ $item->id }}</td>
-                        
-                        <td style="text-align: left;">{{ Auth::user()->name }}</td>
-                        <td style="text-align: left;">{{ $item->selected_pdf_name }}</td>
-                        <td style="text-align: left;">{{ $item->contract_name }}</td>
-                     
-                        <td style="text-align: left;">{{ $item->recipient_email}}</td>
-
-                        <td style="text-align: left;" class="
-                            @if($item->status == 'pending') 
-                                text-danger
-                            @elseif($item->status == 'viewed') 
-                                text-warning
-                            @elseif($item->status == 'signed') 
-                                text-success
-                            @else 
-                                text-secondary
-                            @endif">
-                            {{ $item->status }}
-                        </td>
-
-
-                        
-                        <td style="text-align: left;">
-                            <div class="btn-toolbar">
-                                <button class="btn btn-primary" onclick="EditSalesContract('{{ $item->id }}')">Edit</button>
-                                <button type="button" style="margin-left:2px;" onclick="DeleteSalesContract('{{ $item->id }}')" class="btn btn-danger waves-effect waves-light">
-                                    <i class="bx bx-block font-size-16 align-middle me-2"></i> Delete
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </div>
-    -->
+ 
     
     <div class="table-responsive" style="margin-top:10px;">
     <table id="ContractList" class="table">
@@ -137,7 +81,8 @@
                         {{ $item->status }}
                     </td>
 
-                    <td style="text-align: left;">
+              
+                    <!-- <td style="text-align: left;">
                         <div class="btn-toolbar">
                             @if($item->status == 'signed')
                             <button onclick="openSignedPDF('{{ $item->id }}')" class="btn btn-success">PDF</button>
@@ -146,12 +91,43 @@
                             @endif
                             <button type="button" style="margin-left:2px;" onclick="DeleteSalesContract('{{ $item->id }}')" class="btn btn-danger waves-effect waves-light">
                                 <i class="bx bx-block font-size-16 align-middle me-2"></i> @lang('translation.Delete')
-                            </button>   
-                       
-
-
+                            </button>
                         </div>
                     </td>
+                    
+                    <td style="text-align: left;">
+                        <div class="btn-toolbar">
+                            @if($item->status == 'signed')
+                                <button onclick="openSignedPDF('{{ $item->id }}')" class="btn btn-success">PDF</button>
+                                
+                                  <button class="btn btn-danger" disabled>
+                                    <i class="bx bx-block font-size-16 align-middle me-2"></i> @lang('translation.Delete')
+                                </button>  
+                            @else 
+                                <button class="btn btn-primary" onclick="EditSalesContract('{{ $item->id }}')">@lang('translation.Edit')</button>
+                                <button type="button" style="margin-left:2px;" onclick="DeleteSalesContract('{{ $item->id }}')" class="btn btn-danger waves-effect waves-light">
+                                    <i class="bx bx-block font-size-16 align-middle me-2"></i> @lang('translation.Delete')
+                                </button>
+                            @endif
+                        </div>
+                    </td>  -->
+                    
+                    <td style="text-align: left;">
+                        <div class="btn-toolbar">
+                            @if($item->status == 'signed')
+                                <button onclick="openSignedPDF('{{ $item->id }}')" class="btn btn-success">PDF</button>
+                            @elseif($item->status == 'pending')
+                                  <button class="btn btn-primary" onclick="EditSalesContract('{{ $item->id }}')">@lang('translation.Edit')</button>
+                            @else
+                                <button class="btn btn-primary" onclick="EditSalesContract('{{ $item->id }}')">@lang('translation.Edit')</button>
+                                <button type="button" style="margin-left:2px;" onclick="DeleteSalesContract('{{ $item->id }}')" class="btn btn-danger waves-effect waves-light">
+                                    <i class="bx bx-block font-size-16 align-middle me-2"></i> @lang('translation.Delete')
+                                </button>
+                            @endif
+                        </div>
+                    </td>
+
+                    
                 </tr>
             @endforeach
         </tbody>
@@ -355,7 +331,12 @@
             method: 'POST',
             data: {_token: '{{ csrf_token() }}'},
             success: function(response) {
-                window.location.href = "/Send-New-Contracts";
+              //  window.location.href = "/Send-New-Contracts";
+              var newEntryId = response.entry.id;
+
+            // Redirect to the new URL with the id
+            window.location.href = "/Send-New-Contracts/" + newEntryId;
+            
             },
             error: function(xhr, status, error) {
                 console.error(xhr.responseText);

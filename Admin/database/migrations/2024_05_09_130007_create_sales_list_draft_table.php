@@ -29,7 +29,7 @@ class CreateSalesListDraftTable extends Migration
             $table->string('envelope_id')->nullable();
             $table->string('recipient_email')->nullable();
             $table->string('shareable_pdf_link')->nullable();
-            
+            $table->unsignedBigInteger('company_id')->nullable();
             $table->timestamps();
         });
     }

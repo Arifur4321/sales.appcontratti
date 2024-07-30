@@ -92,13 +92,22 @@
                 <thead>
                     <tr>
                     <th style="width:50%"> @lang('translation.Variable Name') </th>
-                        <th style="width:60%"> @lang('translation.Variable Label Value') </th>
+                        <!-- <th style="width:60%"> @lang('translation.Variable Label Value') </th> -->
+                        <th style="width:60%"> 
+                                    @lang('translation.Variable Label Value') 
+                                    <button type="button" class="btn btn-info btn-sm ml-2" id="checkButton">
+                                        @lang('translation.check') </button>
+                         </th>
+
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
+
                         <td></td>
+                    
                         <td></td>
+                    
                     </tr>
                 </tbody>
             </table>
@@ -118,6 +127,68 @@
             </div>
         </div>
 </div>
+
+
+
+
+     <!-- Modal for displaying the table and view buttons -->
+     <div class="modal fade" id="checkModal" tabindex="-1" aria-labelledby="checkModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="checkModalLabel">Check Variables</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                    <div class="mb-3">
+                        <div class="row">
+                            <div class="col-md-4"> <!-- Adjust this value for the desired width -->
+                                <input type="text" id="searchBox" class="form-control" placeholder="Search...">
+                            </div>
+                        </div>
+                    </div>
+
+
+                        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Product Name</th>
+                                        <th>Contract Name</th>
+                                        <th>Recipient Email</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="modalTableBody">
+                                    <!-- Rows will be dynamically inserted here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+ 
+       <!-- Modal for displaying the variableJson data -->
+<div class="modal fade" id="jsonModal" tabindex="-1" aria-labelledby="jsonModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="jsonModalLabel">Variable Data</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="variableJsonContent" style="white-space: pre-wrap;"></div>
+                <div class="text-right mt-3">
+                    <button type="button" class="btn btn-secondary" id="insertDataButton">Insert</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 
  <!--for toast -->
@@ -165,6 +236,213 @@
         </div>
     </div>
 </div>
+
+
+
+  <!-- For auto load with check button to the variable field   -->
+
+  <script>
+        
+        document.addEventListener("DOMContentLoaded", function() {
+           $('#checkButton').on('click', function() {
+               $.ajax({
+                   url: '{{ route("sales.data") }}',
+                   type: 'GET',
+                   success: function(data) {
+                       console.log('The check JSON data:', data);
+                       populateTable(data);
+                       $('#checkModal').modal('show');
+                   },
+                   error: function(xhr, status, error) {
+                       console.error('Error fetching sales data:', error);
+                   }
+               });
+           });
+       
+           function populateTable(data) {
+               var modalTableBody = $('#modalTableBody');
+               modalTableBody.empty();
+       
+               data.forEach(function(item) {
+                   var variableJson = item.variable_json;
+                   var jsonString = '';
+       
+                   // Check if variableJson is a string and try to parse it
+                   if (typeof variableJson === 'string') {
+                       try {
+                           variableJson = JSON.parse(variableJson);
+                       } catch (e) {
+                           console.error('Error parsing variable_json string:', e);
+                           variableJson = null; // Set to null if parsing fails
+                       }
+                   }
+       
+                   // Check if variableJson is an array and contains objects with specific properties
+                   if (Array.isArray(variableJson) && variableJson.length > 0 && variableJson[0].name && variableJson[0].type) {
+                       // Convert the JSON object or array to a string for storage in the data-json attribute
+                       jsonString = JSON.stringify(variableJson, null, 4);
+                   }
+       
+                   // Escape any potential HTML or special characters in jsonString
+                   var sanitizedJsonString = $('<div>').text(jsonString).html();
+       
+                   var row = `<tr>
+                       <td>${item.id}</td>
+                       <td>${item.product_name}</td>
+                       <td>${item.contract_name}</td>
+                       <td>${item.recipient_email}</td>
+                       <td>
+                           <button type="button" class="btn btn-primary view-btn" data-json='${sanitizedJsonString}'>View</button>
+                       </td>
+                   </tr>`;
+                   modalTableBody.append(row);
+               });
+       
+               // Add event listener for search functionality
+               $('#searchBox').on('keyup', function() {
+                   var value = $(this).val().toLowerCase();
+                   $("#modalTableBody tr").filter(function() {
+                       $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+                   });
+               });
+           }
+       
+           // Handle "View" button click
+           $(document).on('click', '.view-btn', function() {
+               var jsonData = $(this).data('json');
+       
+               try {
+                   // If jsonData is a string, ensure it's parsed
+                   if (typeof jsonData === 'string' && jsonData !== '') {
+                       jsonData = JSON.parse(jsonData);
+                   }
+               } catch (e) {
+                   console.error('Error parsing JSON data:', e);
+                   jsonData = [];
+               }
+       
+               // Check if jsonData is an array and has the desired structure
+               if (Array.isArray(jsonData) && jsonData.length > 0 && jsonData[0].name && jsonData[0].type) {
+                   var tableContent = '<table class="table table-bordered"><thead><tr><th>Variable Name</th><th>Variable Type</th><th>Variable Value</th></tr></thead><tbody>';
+                   jsonData.forEach(function(variable) {
+                       // Filter by type
+                       if (['Single Line Text', 'Dates', 'Multiple Line Text'].includes(variable.type)) {
+                           tableContent += `<tr>
+                               <td>${variable.name}</td>
+                               <td>${variable.type}</td>
+                               <td>${variable.value}</td>
+                           </tr>`;
+                       }
+                   });
+                   tableContent += '</tbody></table>';
+                   $('#variableJsonContent').html(tableContent);
+               } else {
+                   $('#variableJsonContent').text('No valid data to display.');
+               }
+       
+               $('#jsonModal').modal('show');
+           });
+       
+           // Handle "Insert" button click
+           $('#insertDataButton').on('click', function() {
+               console.log('Insert button clicked');
+               // Implement your insertion logic here
+           });
+       
+       
+           $(document).on('click', '.view-btn', function() {
+               var jsonData = $(this).data('json');
+       
+               try {
+                   if (typeof jsonData === 'string' && jsonData !== '') {
+                       jsonData = JSON.parse(jsonData);
+                   }
+               } catch (e) {
+                   console.error('Error parsing JSON data:', e);
+                   jsonData = [];
+               }
+       
+               // Check if jsonData is an array and has the desired structure
+               if (Array.isArray(jsonData) && jsonData.length > 0 && jsonData[0].name && jsonData[0].type) {
+                   var tableContent = '<table class="table table-bordered"><thead><tr><th>Variable Name</th><th>Variable Type</th><th>Variable Value</th></tr></thead><tbody>';
+                   jsonData.forEach(function(variable) {
+                       if (['Single Line Text', 'Dates', 'Multiple Line Text'].includes(variable.type)) {
+                           tableContent += `<tr>
+                               <td>${variable.name}</td>
+                               <td>${variable.type}</td>
+                               <td>${variable.value}</td>
+                           </tr>`;
+                       }
+                   });
+                   tableContent += '</tbody></table>';
+                   $('#variableJsonContent').html(tableContent);
+               } else {
+                   $('#variableJsonContent').text('No valid data to display.');
+               }
+       
+               $('#jsonModal').modal('show');
+           });
+       
+           // Handle "Insert" button click
+           $('#insertDataButton').on('click', function() {
+               console.log('Insert button clicked');
+               var jsonData = $('#variableJsonContent table tbody tr').map(function() {
+                   return {
+                       name: $(this).find('td').eq(0).text().trim(),
+                       type: $(this).find('td').eq(1).text().trim(),
+                       value: $(this).find('td').eq(2).text().trim()
+                   };
+               }).get();
+       
+               // Insert data into the appropriate fields in the `sales-variable` table
+               $('#sales-variable tbody tr').each(function() {
+                   var $row = $(this);
+                   var variableName = $row.find('td').eq(0).text().trim();
+                   var variableType = $row.data('variable-type');
+       
+                   // Find the matching variable in jsonData
+                   var matchingVariable = jsonData.find(function(variable) {
+                       return variable.name === variableName && ['Single Line Text', 'Dates', 'Multiple Line Text'].includes(variable.type);
+                   });
+       
+                   if (matchingVariable) {
+                       // Update the field with the value
+                       switch (variableType) {
+                           case 'Dates':
+                               $row.find('input[type="date"]').val(matchingVariable.value);
+                               break;
+                           case 'Single Line Text':
+                           case 'Multiple Line Text':
+                               $row.find('input[type="text"]').val(matchingVariable.value);
+                               break;
+                       }
+                   }
+               });
+       
+               $('#jsonModal').modal('hide');
+           });
+       
+       
+       
+       
+       });
+       
+       
+           </script>
+       
+           <style>
+               #variableJsonContent {
+                   max-height: 400px;
+                   overflow-y: auto;
+                   background-color: #f8f9fa;
+                   padding: 15px;
+                   border: 1px solid #dee2e6;
+                   border-radius: 4px;
+               }
+           </style>
+
+
+
 
 <style>
     .noUi-tooltip {

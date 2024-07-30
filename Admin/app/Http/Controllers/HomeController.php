@@ -41,33 +41,88 @@ class HomeController extends Controller
         return view('/');
     }
 
+
+    // public function contractList()
+    // {
+    
+    //     $sellerName = Auth::user()->name;
+
+    //     $salesDetail = SalesDetails::where('name', $sellerName)->first();
+    //     if (!$salesDetail) {
+    //         return response()->json(['status' => 'error', 'message' => 'Sales details not found']);
+    //     }
+
+    //     $salesId = $salesDetail->id;
+    //     $salesName = $salesDetail->name;
+
+    //     if ( $salesId ) {
+        
+    //         $salesListDraft = SalesListDraft::where('sales_id', $salesId)->get();
+
+    //         return view('Your-Lists', compact('salesListDraft'));
+    //     }
+
+    //     return response()->json(['status' => 'error', 'message' => 'Unauthorized access']);
+   
+    // }
+
+
+    // public function contractList()
+    // {
+    //     // Check if the user is authenticated
+    //     if (Auth::check()) {
+    //         $sellerName = Auth::user()->name;
+
+    //         $salesDetail = SalesDetails::where('name', $sellerName)->first();
+    //         if (!$salesDetail) {
+    //             return response()->json(['status' => 'error', 'message' => 'Sales details not found']);
+    //         }
+
+    //         $salesId = $salesDetail->id;
+
+    //         if ($salesId) {
+    //             // Query SalesListDraft table based on $salesId
+    //             $salesListDraft = SalesListDraft::where('sales_id', $salesId)->get();
+
+    //             return view('Your-Lists', compact('salesListDraft'));
+    //         }
+
+    //         return response()->json(['status' => 'error', 'message' => 'Unauthorized access']);
+    //     }
+
+    //     // Redirect to login if not authenticated
+    //     return redirect()->route('login');
+    // }
+
+
     public function contractList()
     {
-    
-    // Fetch contracts from the database if needed
-    //   $salesListDraft = SalesListDraft::all();
-    //   return view('Your-Lists', compact('salesListDraft'));
+        // Check if the user is authenticated
+        if (Auth::check()) {
+            $userEmail = Auth::user()->email;
 
-     $sellerName = Auth::user()->name;
+            // Fetch the sales detail using the authenticated user's email
+            $salesDetail = SalesDetails::where('email', $userEmail)->first();
+            if (!$salesDetail) {
+                return response()->json(['status' => 'error', 'message' => 'Sales details not found']);
+            }
 
-     $salesDetail = SalesDetails::where('name', $sellerName)->first();
-     if (!$salesDetail) {
-         return response()->json(['status' => 'error', 'message' => 'Sales details not found']);
-     }
+            $salesId = $salesDetail->id;
 
-     $salesId = $salesDetail->id;
-     $salesName = $salesDetail->name;
+            if ($salesId) {
+                // Query SalesListDraft table based on $salesId
+                $salesListDraft = SalesListDraft::where('sales_id', $salesId)->get();
 
-     if ($sellerName == $salesName) {
-         // Query SalesListDraft table based on $salesId
-         $salesListDraft = SalesListDraft::where('sales_id', $salesId)->get();
+                return view('Your-Lists', compact('salesListDraft'));
+            }
 
-         return view('Your-Lists', compact('salesListDraft'));
-     }
+            return response()->json(['status' => 'error', 'message' => 'Unauthorized access']);
+        }
 
-     return response()->json(['status' => 'error', 'message' => 'Unauthorized access']);
-   
+        // Redirect to login if not authenticated
+        return redirect()->route('login');
     }
+
 
 
     /*Language Translation*/
